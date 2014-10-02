@@ -1,0 +1,36 @@
+lexemes { #SYMBOL=regex
+  WHITE_SPACE=\\s+
+  RELATIONS=(V|A|N|-)/(V|A|N|-)
+  =vojnový stav
+  =iba stíhače
+  COUNT=\\d+
+  SECTOR_SHORT=\\[(\\w{3})\\]
+  SHIP_CLASS=\\[([SKLD])\\]
+  SHIP_TAIL=(\\w+):
+  WORD=\\w+
+  WORD2=\\S+
+}
+
+
+ignore lexemes { #SYMBOL enumeration separated by comma
+  WHITE_SPACE
+}
+
+initial { #initial state
+  SECTOR
+}
+
+accepting { #accepting states
+  SHIP_COUNT
+}
+
+transitions { #(state, symbol) -> state
+  (SECTOR, SECTOR_SHORT) -> SECTOR_SHORT
+  (SECTOR_SHORT, RELATIONS) -> RELATIONS
+  (RELATIONS, WORD{1,2}) -> PARTY
+  (PARTY, SHIP_CLASS) -> SHIP_CLASS
+  (SHIP_CLASS, WORD, SHIP_TAIL) -> SHIP
+  (SHIP, COUNT) -> SHIP_COUNT
+  (SHIP_COUNT -> SECTOR | SHIP_CLASS
+  
+}

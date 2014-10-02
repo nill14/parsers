@@ -1,0 +1,290 @@
+Sektor	Vzťah	Štát	Lode
+Dilgar
+[dil]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Virana
+[vir]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+V/V	Vorlonské Impérium	[L] Star Dreadnought: 1
+Abbai
+[abb]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Akdor
+[akd]	A/A	Centaurská Republika	[K] Covran Scout: 76
+[K] Vorchan Cruiser: 86
+[L] Covran Gunship: 290
+[L] Primus Cruiser: 89
+Alpha 1
+[al1]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Alpha 2
+[al2]	A/A	Centaurská Republika	[K] Covran Scout: 1
+[K] Kutai Gunship: 1
+Brakesh
+[bra]	A/A	Centaurská Republika	[K] Covran Scout: 9
+[K] Kutai Gunship: 11
+[K] Vorchan Cruiser: 2
+[L] Covran Gunship: 2
+[L] Primus Cruiser: 8
+Centauri Prime
+[cen]	A/A	Centaurská Republika	[K] Covran Scout: 36
+[L] Primus Cruiser: 10
+Draxis
+[drx]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Gorash 7
+[gor]	A/A	Centaurská Republika	[K] Covran Scout: 3
+[L] Covran Gunship: 23
+A/A	Pozemská Aliancia	[L] Warlock Destroyer: 1
+Inner Centauri Space
+[ics]	A/A	Centaurská Republika	[K] Covran Scout: 1
+[L] Primus Cruiser: 9
+Immolan 5
+[imo]	A/A	Centaurská Republika	[K] Covran Scout: 1
+[L] Covran Gunship: 1
+[L] Primus Cruiser: 1
+Kandar
+[kan]	A/A	Centaurská Republika	[K] Covran Scout: 1
+[L] Covran Gunship: 3
+[L] Primus Cruiser: 1
+Lukantha
+[luk]	A/A	Centaurská Republika	[L] Covran Gunship: 1
+[L] Primus Cruiser: 1
+Outer Drazu
+[odz]	A/A	Centaurská Republika	[L] Covran Gunship: 1
+Omega 7
+[omg]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Pagati
+[pag]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Quadrant 13
+[q13]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 30
+[L] Covran Gunship: 49
+[L] Primus Cruiser: 4
+Ragesh 3
+[rag]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 1
+[L] Covran Gunship: 3
+Sector 51
+[s51]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 3
+[L] Covran Gunship: 9
+[L] Primus Cruiser: 8
+Sector 70
+[s70]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Sector 81
+[s81]	A/A	Centaurská Republika	[K] Covran Scout: 6
+[K] Vorchan Cruiser: 2
+Sector 84
+[s84]	A/A	Centaurská Republika	[L] Primus Cruiser: 1
+Tikar Home World
+[tik]	A/A	Centaurská Republika	[K] Covran Scout: 1
+Tokat Home World
+[tok]	A/A	Centaurská Republika	[K] Covran Scout: 3
+[K] Vorchan Cruiser: 1
+[L] Covran Gunship: 7
+Daltron 7
+[dal]	A/A	Kolónia Drakhov	[L] Drakh Advanced: 2
+Ipsha
+[ips]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 1
+[K] Drakh Shuttle: 2
+[L] Drakh Advanced: 2
+[L] Drakh Carrier: 10
+Narn Outer Space
+[nos]	A/A	Kolónia Drakhov	iba stíhače
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Quadrant 91
+[q91]	A/A	Kolónia Drakhov	[L] Drakh Advanced: 1
+A/A	Pozemská Aliancia	[L] Omega Destroyer: 3
+Sector 20
+[s20]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 3
+[L] Drakh Advanced: 18
+T'Llin
+[tli]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 4
+[L] Drakh Advanced: 20
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Vorlon Inner Space
+[vis]	A/A	Kolónia Drakhov	[L] Drakh Advanced: 1
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 3
+[L] Warlock Destroyer: 6
+V/V	Vorlonské Impérium	iba stíhače
+Vorlon Outer Space
+[vos]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 7
+[K] Drakh Shuttle: 30
+[L] Drakh Advanced: 9
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 10
+[L] Warlock Destroyer: 9
+Babylon 5
+[b5]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+[L] Omega Destroyer: 1
+[L] Warlock Destroyer: 4
+Berdina
+[ber]	A/A	Pozemská Aliancia	[L] Warlock Destroyer: 2
+Beta Durani
+[bet]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Coriana 6
+[cor]	A/A	Pozemská Aliancia	[K] Hyperion Cruiser: 1
+L Gn Daort
+[dao]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 3
+Deneb 4
+[den]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 7
+[L] Warlock Destroyer: 4
+D' Tira
+[dti]	A/A	Kolónia Drakhov	[K] Toreth: 2
+[L] Bin'Tak: 2
+[L] Drakh Carrier: 5
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 2
+Davo
+[dvo]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 1
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Earth
+[ear]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 2
+[L] Warlock Destroyer: 3
+L'Gidor
+[gid]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Hilak 7
+[hil]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+Io
+[io]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 7
+Inner Solar System
+[iso]	A/A	Kolónia Drakhov	[K] Toreth: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 6
+[D] Death Cloud: 1
+Mars
+[mar]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 50
+[L] Warlock Destroyer: 27
+Narn Inner Space
+[nis]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+[L] Omega Destroyer: 1
+Orion
+[ori]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Outer Solar System
+[oso]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 6
+Pakmara
+[pak]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Praxis 9
+[pra]	A/A	Centaurská Republika	[K] Covran Scout: 1
+[K] Vorchan Cruiser: 1
+A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+Proxima 3
+[pro]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 1
+[L] Drakh Carrier: 5
+A/A	Pozemská Aliancia	[K] Hyperion Cruiser: 7
+[K] Olympus Corvette: 21
+[L] Omega Destroyer: 27
+[L] Warlock Destroyer: 22
+Quadrant 14
+[q14]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 10
+[K] Drakh Shuttle: 2
+[L] Drakh Advanced: 41
+[L] Drakh Carrier: 1
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 5
+[L] Omega Destroyer: 13
+[L] Warlock Destroyer: 36
+Quadrant 46
+[q46]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+[L] Warlock Destroyer: 4
+Quadrant 68
+[q68]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 6
+[L] Drakh Advanced: 40
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 10
+[L] Warlock Destroyer: 81
+V/V	Vorlonské Impérium	[L] Star Dreadnought: 1
+Quadrant X
+[qx]	A/A	Kolónia Drakhov	[K] Drakh Shuttle: 4
+A/A	Pozemská Aliancia	[L] Omega Destroyer: 2
+[L] Warlock Destroyer: 3
+Regula 4
+[reg]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 7
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+[L] Omega Destroyer: 20
+Roth
+[rot]	A/A	Pozemská Aliancia	[L] Omega Destroyer: 5
+Sector 14
+[s14]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 2
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+[L] Omega Destroyer: 21
+Sector 27
+[s27]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Sector 35
+[s35]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 3
+[L] Drakh Advanced: 5
+[L] Drakh Carrier: 5
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 25
+[L] Omega Destroyer: 21
+[L] Warlock Destroyer: 69
+Sector 4
+[s4]	A/A	Kolónia Drakhov	[K] Drakh Cruiser: 2
+[L] Drakh Advanced: 2
+A/A	Pozemská Aliancia	[K] Olympus Corvette: 4
+[L] Warlock Destroyer: 4
+Sektor 67
+[s67]	V/V	Bez občianstva	[L] Bin'Tak: 1
+A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+Syria planum
+[syr]	A/A	Pozemská Aliancia	[L] Warlock Destroyer: 1
+Tiree
+[tir]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Vega
+[veg]	A/A	Centaurská Republika	[L] Covran Gunship: 1
+A/A	Kolónia Drakhov	[K] Drakh Cruiser: 2
+A/A	Pozemská Aliancia	[K] Hyperion Cruiser: 7
+[K] Olympus Corvette: 9
+[L] Omega Destroyer: 1
+[L] Warlock Destroyer: 28
+Ventari 3
+[ven]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Zhabar
+[zha]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+Antra
+[anr]	A/A	Kolónia Drakhov	[K] Drakh Shuttle: 6
+[D] Mother Ship: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 14
+[L] Battle Crab: 6
+[D] Death Cloud: 2
+Arisia Colony
+[ari]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Cyrus
+[cyr]	V/V	Bez občianstva	[L] Bin'Tak: 3
+-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Ikarra 7
+[ika]	V/V	Bez občianstva	[L] Bin'Tak: 5
+A/A	Centaurská Republika	[K] Vorchan Cruiser: 13
+[L] Primus Cruiser: 18
+-/-	Tienske Spoločenstvo	[K] Vampire: 59
+[L] Battle Crab: 69
+[D] Death Cloud: 2
+Markab
+[mab]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+[D] Death Cloud: 1
+Nether Rim
+[net]	-/-	Tienske Spoločenstvo	[K] Vampire: 27
+[D] Death Cloud: 16
+Nochtal
+[noc]	-/-	Tienske Spoločenstvo	[K] Vampire: 19
+[L] Battle Crab: 19
+Quadrant 55
+[q55]	A/A	Pozemská Aliancia	[K] Olympus Corvette: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Rim Space
+[rim]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Sector 21
+[s21]	-/-	Tienske Spoločenstvo	[L] Battle Crab: 2
+Sector 3
+[s3]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 1
+Sector 58
+[s58]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Shi
+[shi]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Sigma 957
+[sig]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Vree
+[vre]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+[L] Battle Crab: 1
+Yolu
+[yol]	A/A	Centaurská Republika	[K] Vorchan Cruiser: 1
+A/A	Pozemská Aliancia	[L] Omega Destroyer: 1
+-/-	Tienske Spoločenstvo	[K] Vampire: 1
+[L] Battle Crab: 6
+Zagro 7
+[zag]	-/-	Tienske Spoločenstvo	[K] Vampire: 1
+Thalitene
+[tha]
+vojnový stav	A/A	Pozemská Aliancia	[K] Hyperion Cruiser: 1
+[L] Omega Destroyer: 31
+V/V	Vorlonské Impérium	[K] Ambassador: 1
+[L] Star Dreadnought: 4

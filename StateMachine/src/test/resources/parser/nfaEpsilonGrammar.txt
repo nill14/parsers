@@ -1,0 +1,27 @@
+lexemes { #SYMBOL=regex
+  0=0
+  1
+  #ε
+}
+
+ignore lexemes { #SYMBOL enumeration separated by comma
+  WHITE_SPACE
+}
+
+initial { #initial state
+  A
+}
+
+accepting { #accepting states
+  C, D
+}
+
+transitions { #(state, symbol) -> state
+  (A, 0) -> B
+  (A, ε) -> C
+  (B, 1) -> B
+  (B, 1) -> D
+  (C, ε) -> B
+  (C, 0) -> D
+  (D, 0) -> C
+}
