@@ -1,28 +1,37 @@
 package com.github.nill14.parsers.dependency;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 public final class DependencyCollector implements IDependencyCollector {
 	
 	
-	private final ImmutableList<String> dependencies;
-	private final ImmutableList<String> providers;
+	private final ImmutableSet<String> dependencies;
+	private final ImmutableSet<String> optDependencies;
+	private final ImmutableSet<String> optProviders;
 	private final String name;
 
 	private DependencyCollector(Builder builder) {
 		dependencies = builder.dependencies.build();
-		providers = builder.providers.build();
+		optDependencies = builder.optDependencies.build();
+		optProviders = builder.providers.build();
 		name = builder.name;
 	}
 
 	@Override
-	public ImmutableList<String> getDependencies() {
+	public Set<String> getRequiredDependencies() {
 		return dependencies;
 	}
 	
 	@Override
-	public ImmutableList<String> getProviders() {
-		return providers;
+	public Set<String> getOptionalDependencies() {
+		return optDependencies;
+	}
+	
+	@Override
+	public Set<String> getOptionalProviders() {
+		return optProviders;
 	}
 
 	public static Builder builder(String name) {
@@ -41,20 +50,35 @@ public final class DependencyCollector implements IDependencyCollector {
 	
 	public static class Builder {
 		
-		private final ImmutableList.Builder<String> dependencies = ImmutableList.builder();
-		private final ImmutableList.Builder<String> providers = ImmutableList.builder();
+		private final ImmutableSet.Builder<String> dependencies = ImmutableSet.builder();
+		private final ImmutableSet.Builder<String> optDependencies = ImmutableSet.builder();
+		private final ImmutableSet.Builder<String> providers = ImmutableSet.builder();
 		private final String name;
 		
 		public Builder(String name) {
 			this.name = name;
+			providers.add(name);
 		}
 		
+		/**
+		 * consumes, dependsOn 
+		 */
 		public Builder dependsOn(Class<?> clazz) {
 			return dependsOn(clazz.getName());
 		}
 		
-		public Builder isPrerequisiteOf(Class<?> clazz) {
-			return isPrerequisiteOf(clazz.getName());
+		/**
+		 * consumes, dependsOn (optionally)
+		 */
+		public Builder dependsOnOptionally(Class<?> clazz) {
+			return dependsOnOptionally(clazz.getName());
+		}
+		
+		/**
+		 * provides or isPrerequisiteOf
+		 */
+		public Builder provides(Class<?> clazz) {
+			return provides(clazz.getName());
 		}
 
 		public Builder dependsOn(String fqn) {
@@ -62,7 +86,12 @@ public final class DependencyCollector implements IDependencyCollector {
 			return this;
 		}
 		
-		public Builder isPrerequisiteOf(String fqn) {
+		public Builder dependsOnOptionally(String fqn) {
+			optDependencies.add(fqn);
+			return this;
+		}
+		
+		public Builder provides(String fqn) {
 			providers.add(fqn);
 			return this;
 		}

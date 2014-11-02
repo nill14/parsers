@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -38,33 +39,27 @@ public class GraphOrderTest {
 
 
 	@Before
-	public void init() {
+	public void init() throws DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.produces("A")
 				.consumes("M")
 				.build(),
 			Module.builder("B")
 				.consumes("A")
-				.produces("B")
 				.build(),
 			Module.builder("C")
 				.consumes("A")
 				.consumes("B")
-				.produces("C")
 				.build(),	
 				
 			//not connected	
 			Module.builder("D")
-				.produces("D")
 				.build(),
 				
 			Module.builder("E")
-				.produces("E")
 				.build(),	
 			Module.builder("F")
 				.consumes("E")
-				.produces("F")
 				.build(),
 			Module.builder("G")
 				.consumes("F")
@@ -81,14 +76,12 @@ public class GraphOrderTest {
 				.build(),
 				
 			Module.builder("K")
-				.produces("K")
 				.build(),
 			Module.builder("L")
 				.consumes("K")
 				.build(),
 				
 			Module.builder("M")
-				.produces("M")
 				.build()
 		);		
 		

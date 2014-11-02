@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
 import com.github.nill14.parsers.dependency.IDependencyBuilder;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -33,31 +34,26 @@ public class GraphCycleTest {
 
 
 	@Before
-	public void init() {
+	public void init() throws DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.produces("A")
 				.consumes("M")
 				.build(),
 			Module.builder("B")
 				.consumes("A")
-				.produces("B")
 				.build(),
 			Module.builder("C")
 				.consumes("A")
 				.consumes("B")
-				.produces("C")
 				.build(),	
 				
 			//not connected	
 			Module.builder("D")
-				.produces("D")
 				.build(),
 				
 			//cycle	
 			Module.builder("E")
 				.consumes("G")
-				.produces("E")
 				.build(),	
 			Module.builder("F")
 				.consumes("E")
@@ -65,12 +61,10 @@ public class GraphCycleTest {
 				.build(),
 			Module.builder("G")
 				.consumes("F")
-				.produces("G")
 				.build(),
 				
 			Module.builder("H")
 				.consumes("C")
-				.produces("H")
 				.build(),
 			Module.builder("I")
 				.consumes("C")
@@ -81,16 +75,13 @@ public class GraphCycleTest {
 				
 			// another cycle	
 			Module.builder("K")
-				.produces("K")
 				.consumes("L")
 				.build(),
 			Module.builder("L")
-				.produces("L")
 				.consumes("K")
 				.build(),
 				
 			Module.builder("M")
-				.produces("M")
 				.consumes("H")
 				.build()
 		);		

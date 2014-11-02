@@ -20,8 +20,9 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
-import com.github.nill14.parsers.dependency.IDependencyWalker;
+import com.github.nill14.parsers.dependency.IDependencyManager;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -40,14 +41,14 @@ public class GraphWalkerTest {
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
 	private DependencyBuilder<Module> dependencyBuilder;
-	private IDependencyWalker<Module> walker; 
+	private IDependencyManager<Module> walker; 
 	private ImmutableMap<String, Module> moduleIndex;
 
 
 	@Rule public ExpectedException thrown = ExpectedException.none();
 
 	@Before
-	public void init() throws CyclicGraphException {
+	public void init() throws CyclicGraphException, DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.produces("A")
@@ -55,25 +56,20 @@ public class GraphWalkerTest {
 				.build(),
 			Module.builder("B")
 				.consumes("A")
-				.produces("B")
 				.build(),
 			Module.builder("C")
 				.consumes("A")
 				.consumes("B")
-				.produces("C")
 				.build(),	
 				
 			//not connected	
 			Module.builder("D")
-				.produces("D")
 				.build(),
 				
 			Module.builder("E")
-				.produces("E")
 				.build(),	
 			Module.builder("F")
 				.consumes("E")
-				.produces("F")
 				.build(),
 			Module.builder("G")
 				.consumes("F")
@@ -90,14 +86,12 @@ public class GraphWalkerTest {
 				.build(),
 				
 			Module.builder("K")
-				.produces("K")
 				.build(),
 			Module.builder("L")
 				.consumes("K")
 				.build(),
 				
 			Module.builder("M")
-				.produces("M")
 				.build()
 		);		
 		

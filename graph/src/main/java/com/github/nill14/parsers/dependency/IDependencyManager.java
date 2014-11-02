@@ -8,7 +8,7 @@ import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 
-public interface IDependencyWalker<Module extends IDependencyCollector> {
+public interface IDependencyManager<Module extends IDependencyCollector> {
 
 	/**
 	 * In the graph a dependency relation is modeled by precursors direction
@@ -18,8 +18,16 @@ public interface IDependencyWalker<Module extends IDependencyCollector> {
 	 */
 	DirectedGraph<Module, GraphEdge<Module>> getGraph();
 
+	/**
+	 * 
+	 * @return a set of dependency collectors (modules)
+	 */
 	Set<Module> getCollectors();
 	
+	/**
+	 * 
+	 * @return a topologically sorted list of collectors
+	 */
 	List<Module> getTopologicalOrder();
 	
 	String getDependencyHierarchy();

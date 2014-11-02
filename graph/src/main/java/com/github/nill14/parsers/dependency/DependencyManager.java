@@ -3,7 +3,7 @@ package com.github.nill14.parsers.dependency;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutorService; 	
 
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -14,14 +14,14 @@ import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-class DependencyWalker<Module extends IDependencyCollector> implements IDependencyWalker<Module> {
+class DependencyManager<Module extends IDependencyCollector> implements IDependencyManager<Module> {
 	
 	private final Set<Module> modules;
 	private final DirectedGraph<Module, GraphEdge<Module>> graph;
 	private final LinkedHashMap<Module, Integer> longestPathMap;
 	private final List<Module> topologicalOrdering;
 	
-	public DependencyWalker(DirectedGraph<Module, GraphEdge<Module>> graph) throws CyclicGraphException {
+	public DependencyManager(DirectedGraph<Module, GraphEdge<Module>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
 		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();

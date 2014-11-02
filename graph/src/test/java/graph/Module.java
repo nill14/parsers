@@ -1,6 +1,6 @@
 package graph;
 
-import java.util.List;
+import java.util.Set;
 
 import com.github.nill14.parsers.dependency.DependencyCollector;
 import com.github.nill14.parsers.dependency.IDependencyCollector;
@@ -14,13 +14,18 @@ public class Module implements IDependencyCollector {
 	}
 
 	@Override
-	public List<String> getDependencies() {
-		return collector.getDependencies();
+	public Set<String> getRequiredDependencies() {
+		return collector.getRequiredDependencies();
 	}
 	
 	@Override
-	public List<String> getProviders() {
-		return collector.getProviders();
+	public Set<String> getOptionalDependencies() {
+		return collector.getOptionalDependencies();
+	}
+	
+	@Override
+	public Set<String> getOptionalProviders() {
+		return collector.getOptionalProviders();
 	}
 
 	public static Builder builder(String name) {
@@ -45,34 +50,13 @@ public class Module implements IDependencyCollector {
 			builder = DependencyCollector.builder(name);
 		}
 		
-		public Builder dependsOn(Class<?> clazz) {
-			builder.dependsOn(clazz);
-			return this;
-		}
-		
-		public Builder isPrerequisiteOf(Class<?> clazz) {
-			builder.isPrerequisiteOf(clazz);
-			return this;
-		}
-
-		public Builder dependsOn(String fqn) {
-			builder.dependsOn(fqn);
-			return this;
-		}
-		
-		public Builder isPrerequisiteOf(String fqn) {
-			builder.isPrerequisiteOf(fqn);
-			return this;
-		}
-		
-
 		public Builder consumes(String fqn) {
 			builder.dependsOn(fqn);
 			return this;
 		}
 		
 		public Builder produces(String fqn) {
-			builder.isPrerequisiteOf(fqn);
+			builder.provides(fqn);
 			return this;
 		}		
 		

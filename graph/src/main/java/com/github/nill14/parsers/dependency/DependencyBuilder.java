@@ -31,33 +31,52 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 		this.modules = graph.nodes();
 	}
 
-	public DependencyBuilder(Set<Module> collectors) {
+	public DependencyBuilder(Set<Module> collectors) throws DependencyBuildException {
 		modules = collectors;
 
 		ImmutableSetMultimap.Builder<String, Module> consumersBuilder = ImmutableSetMultimap.builder();
+		ImmutableSetMultimap.Builder<String, Module> consumersOptBuilder = ImmutableSetMultimap.builder();
 		ImmutableSetMultimap.Builder<String, Module> producersBuilder = ImmutableSetMultimap.builder();
 		
 		for (Module node : collectors) {
-			for (String consumer : node.getDependencies()) {
+			for (String consumer : node.getRequiredDependencies()) {
 				consumersBuilder.put(consumer, node);
 			}
+
+			for (String consumer : node.getOptionalDependencies()) {
+				consumersOptBuilder.put(consumer, node);
+			}
 			
-			for (String producer : node.getProviders()) {
+			for (String producer : node.getOptionalProviders()) {
 				producersBuilder.put(producer, node);
 			}
 		}
 		
 		SetMultimap<String, Module> consumers = consumersBuilder.build();
+		SetMultimap<String, Module> consumersOpt = consumersOptBuilder.build();
 		SetMultimap<String, Module> producers = producersBuilder.build();
 		Builder<GraphEdge<Module>> edges = ImmutableSet.builder();
 		
-		Set<String> keys = Sets.union(consumers.keySet(), producers.keySet());
+		Set<String> keys = Sets.union(consumers.keySet(), consumersOpt.keySet());
 		for (String key : keys) {
 			Set<Module> from = producers.get(key);
 			Set<Module> to = consumers.get(key);
 			
-			for (Module source : from) {
-				for (Module target : to) {
+			for (Module target : to) {
+				if (from.isEmpty()) {
+					throw new DependencyBuildException(target, key);
+				}
+				for (Module source : from) {
+					GraphEdge<Module> edge = EvaluatedGraphEdge.edge(source, target);
+					log.debug("{} -> {}", source, target);
+					edges.add(edge);
+				}
+			}
+			
+			Set<Module> toOpt = consumers.get(key);
+			
+			for (Module target : toOpt) {
+				for (Module source : from) {
 					GraphEdge<Module> edge = EvaluatedGraphEdge.edge(source, target);
 					log.debug("{} -> {}", source, target);
 					edges.add(edge);
@@ -88,8 +107,8 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 	}
 	
 	@Override
-	public IDependencyWalker<Module> buildWalker() throws CyclicGraphException {
-		return new DependencyWalker<>(graph);
+	public IDependencyManager<Module> buildWalker() throws CyclicGraphException {
+		return new DependencyManager<>(graph);
 	}
 	
 }
