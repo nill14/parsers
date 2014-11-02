@@ -21,10 +21,12 @@ public interface DirectedGraph<V, E extends GraphEdge<V>> {
   <X> Set<X> successors(V vertex, Function<V, X> transform);
   <X> Set<X> predecessors(V vertex, Function<V, X> transform);
   
-  DirectedGraph<V, E> withExcluded(Set<V> excluded);
+  /**
+   * @param excluded A (possibly mutable) set 
+   * @return a view of the graph
+   */
+  DirectedGraph<V, E> withoutExcluded(Set<V> excluded);
   
-  
-//  DirectedGraph<T> inverse();
   
   
 }

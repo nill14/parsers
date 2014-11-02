@@ -1,4 +1,4 @@
-package graph.dep;
+package com.github.nill14.parsers.dependency;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package graph.impl;
+package com.github.nill14.parsers.graph.impl;
 
 import java.util.Set;
 
@@ -103,10 +103,9 @@ public class DefaultDirectedGraph<V, E extends GraphEdge<V>> implements Directed
 	}
 	
 	@Override
-	public DirectedGraph<V, E> withExcluded(Set<V> excluded) {
+	public DirectedGraph<V, E> withoutExcluded(Set<V> excluded) {
 		return new DirectedGraphView<V, E>(this, excluded);
 	}
-	
 	
 	public static final <V, E extends GraphEdge<V>> DirectedGraphBuilder<V, E> builder() {
 		return new Builder<>();

@@ -1,12 +1,14 @@
 package graph;
 
-import static org.junit.Assert.*;
-import graph.dep.DependencyBuilder;
-import graph.dep.ModuleConsumer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,29 +17,37 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuilder;
+import com.github.nill14.parsers.dependency.IDependencyWalker;
+import com.github.nill14.parsers.dependency.ModuleConsumer;
+import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class GraphWalkerTest {
 	
-	
+	private static final Logger log = LoggerFactory.getLogger(GraphWalkerTest.class);
 	private final ExecutorService executor = Executors.newFixedThreadPool(8);
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
 	private DependencyBuilder<Module> dependencyBuilder;
+	private IDependencyWalker<Module> walker; 
 	private ImmutableMap<String, Module> moduleIndex;
 
 
-	@Rule public ExpectedException thrown = ExpectedException.none(); 
+	@Rule public ExpectedException thrown = ExpectedException.none();
 
 	@Before
-	public void init() {
+	public void init() throws CyclicGraphException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.produces("A")
@@ -92,6 +102,7 @@ public class GraphWalkerTest {
 		);		
 		
 		dependencyBuilder = new DependencyBuilder<>(modules);
+		walker = dependencyBuilder.buildWalker();
 		graph = dependencyBuilder.getGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
@@ -115,8 +126,8 @@ public class GraphWalkerTest {
 		assertTrue(nodeA + "->" + nodeB, graph.predecessors(nodeB).contains(nodeA));
 	}
 
-	private void topoOrder(List<Module> topologicalOrdering) {
-		System.out.println(topologicalOrdering);
+	private void assertTopoOrder(List<Module> topologicalOrdering) {
+		log.info("{}", topologicalOrdering);
 		assertEquals(modules.size(), topologicalOrdering.size());
 		for (int i = 0; i < topologicalOrdering.size() - 1; i++) {
 			Module n = topologicalOrdering.get(i);
@@ -131,41 +142,46 @@ public class GraphWalkerTest {
 	@Test
 	public void testWalk() throws InterruptedException, ParallelExecutionException {
 		final AtomicInteger count = new AtomicInteger();
+		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		dependencyBuilder.walkGraph(executor, new ModuleConsumer<Module>() {
+		walker.walkGraph(executor, new ModuleConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
-				System.out.println("Starting module " + module);
+				log.info("Starting module {}", module);
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println("Completing module " + module);
+				log.info("Completing module {}", module);
 				count.incrementAndGet();
-				
+				executionOrder.add(module);
 			}
 		});
 		
 		assertEquals(modules.size(), count.get());
+		assertTopoOrder(Lists.newArrayList(executionOrder));
 	}
 	
 	@Test
 	public void testWalkSynchronously() throws InterruptedException, ParallelExecutionException {
 		final AtomicInteger count = new AtomicInteger();
+		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		dependencyBuilder.walkGraph(new ModuleConsumer<Module>() {
+		walker.iterateTopoOrder(new ModuleConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
-				System.out.println("Starting module " + module);
-				System.out.println("Completing module " + module);
+				log.info("Starting module {}", module);
+				log.info("Completing module {}", module);
 				count.incrementAndGet();
+				executionOrder.add(module);
 			}
 		});
 		
 		assertEquals(modules.size(), count.get());
+		assertEquals(walker.getTopologicalOrder(), Lists.newArrayList(executionOrder));
 	}	
 	
 	
@@ -177,17 +193,17 @@ public class GraphWalkerTest {
 		thrown.expectMessage("test checked exception");
 		
 		try {
-			dependencyBuilder.walkGraph(executor, new ModuleConsumer<Module>() {
+			walker.walkGraph(executor, new ModuleConsumer<Module>() {
 				
 				@Override
 				public void process(Module module) throws Exception {
-					System.out.println("Starting module " + module);
+					log.info("Starting module {}", module);
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					System.out.println("Completing module " + module);
+					log.info("Completing module {}", module);
 					if (count.incrementAndGet() == 5) {
 						throw new IOException("test checked exception");
 					};
@@ -204,5 +220,10 @@ public class GraphWalkerTest {
 		
 		assertEquals(modules.size(), count.get());
 	}	
+	
+	@Test
+	public void testLog() {
+		log.info(walker.getDependencyHierarchy());
+	}
 
 }

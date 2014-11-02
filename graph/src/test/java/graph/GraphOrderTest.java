@@ -1,19 +1,22 @@
 package graph;
 
-import static org.junit.Assert.*;
-import graph.dep.DependencyBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuilder;
+import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
@@ -25,6 +28,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class GraphOrderTest {
+	
+	private static final Logger log = LoggerFactory.getLogger(GraphOrderTest.class);
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
@@ -125,25 +130,25 @@ public class GraphOrderTest {
 		Collection<Deque<Module>> cycles = new GraphCycleDetector<>(graph).getNontrivialCycles();
 		
 		
-		System.out.println(cycles);
+		log.info("{}", cycles);
 		assertEquals(0, cycles.size());
 	}
 	
 	@Test
-	public void testTopoSort() {
+	public void testTopoSort() throws CyclicGraphException {
 		List<Module> topologicalOrdering = new LongestPathTopoSorter<>(graph).getTopologicalOrdering();
-		topoOrder(topologicalOrdering);
+		assertTopoOrder(topologicalOrdering);
 	}
 	
 	@Test
-	public void testDepthSort() {
+	public void testDepthSort() throws CyclicGraphException {
 		LinkedHashMap<Module, Integer> topologicalOrdering = new LongestPathTopoSorter<>(graph).getLongestPathMap();
-		System.out.println(topologicalOrdering);
-		topoOrder(Lists.newArrayList(topologicalOrdering.keySet()));
+		log.info("{}", topologicalOrdering);
+		assertTopoOrder(Lists.newArrayList(topologicalOrdering.keySet()));
 	}
 
-	private void topoOrder(List<Module> topologicalOrdering) {
-		System.out.println(topologicalOrdering);
+	private void assertTopoOrder(List<Module> topologicalOrdering) {
+		log.info("{}", topologicalOrdering);
 		assertEquals(modules.size(), topologicalOrdering.size());
 		for (int i = 0; i < topologicalOrdering.size() - 1; i++) {
 			Module n = topologicalOrdering.get(i);

@@ -1,15 +1,12 @@
-package graph.dep;
+package com.github.nill14.parsers.dependency;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
-import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 
 public interface IDependencyBuilder<Module extends IDependencyCollector> {
 
@@ -23,15 +20,7 @@ public interface IDependencyBuilder<Module extends IDependencyCollector> {
 
 	Set<Module> getCollectors();
 	
-	List<Module> getTopologicalOrder() throws CyclicGraphException;
-	
 	Collection<Deque<Module>> getCycles();
 	
-	void walkGraph(ExecutorService executor, ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
-
-	/**
-	 * Synchronous version
-	 */
-	@Deprecated
-	void walkGraph(ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
+	IDependencyWalker<Module> buildWalker() throws CyclicGraphException;
 }

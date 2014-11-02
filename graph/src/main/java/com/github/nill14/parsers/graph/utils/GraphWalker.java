@@ -1,7 +1,6 @@
 package com.github.nill14.parsers.graph.utils;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -33,10 +32,9 @@ public class GraphWalker<V> implements Iterable<V> {
 	private final Lock lock = new ReentrantLock();
 	private final Condition lockCondition = lock.newCondition();
 
-	public <E extends GraphEdge<V>> GraphWalker(DirectedGraph<V, E> graph) {
+	public <E extends GraphEdge<V>> GraphWalker(DirectedGraph<V, E> graph, List<V> topoList) {
 		this.graph = graph;
-		LinkedHashMap<V, Integer> topoMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();
-		this.topoList = Lists.newArrayList(topoMap.keySet());
+		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
 	}
 	
 	public void onComplete(V vertex) {

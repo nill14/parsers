@@ -59,8 +59,9 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	/**
 	 * The result is topologically sorted
 	 * @return 
+	 * @throws CyclicGraphException 
 	 */
-	public LinkedHashMap<V, Integer> getLongestPathMap() {
+	public LinkedHashMap<V, Integer> getLongestPathMap() throws CyclicGraphException {
 		LinkedList<Vertex<V>> vertices = topologicalOrdering();
 		Collections.reverse(vertices);
 		for (Vertex<V> v : vertices) {
@@ -99,16 +100,18 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	/**
 	 * 
 	 * @return a topologically ordered list
+	 * @throws CyclicGraphException 
 	 */
-	public List<V> getLongestPathTopologicalOrdering() {
+	public List<V> getLongestPathTopologicalOrdering() throws CyclicGraphException {
 		return Lists.newArrayList(getLongestPathMap().keySet());
 	}
 
 	/**
 	 * 
 	 * @return a topologically ordered list
+	 * @throws CyclicGraphException 
 	 */
-	public List<V> getTopologicalOrdering() {
+	public List<V> getTopologicalOrdering() throws CyclicGraphException {
 		return FluentIterable.from(topologicalOrdering())
 			.transform(new Function<Vertex<V>, V>() {
 
@@ -134,7 +137,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 //	        unmark n temporarily
 //	        add n to head of L
 	
-	private LinkedList<Vertex<V>> topologicalOrdering() {
+	private LinkedList<Vertex<V>> topologicalOrdering() throws CyclicGraphException {
 		LinkedList<Vertex<V>> list = Lists.newLinkedList();
 		Set<Vertex<V>> visited = Sets.newHashSet();
 		
@@ -147,9 +150,6 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	
 	private void visitUnsorted(Vertex<V> n, Set<Vertex<V>> visited, Deque<Vertex<V>> list) throws CyclicGraphException {
 		if (n.tempMark) {
-			//CyclicGraphException is unchecked exception
-			//the reason is that Graph might be checked for cycles in advance
-			//and we don't want to force user to handle "won't happen" exception
 			throw new CyclicGraphException(graph,
 					"is not DAG - directed acyclic graph - contains cycles");
 		} else if (visited.contains(n)) {

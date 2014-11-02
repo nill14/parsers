@@ -1,4 +1,4 @@
-package graph.impl;
+package com.github.nill14.parsers.graph.impl;
 
 import java.util.Set;
 
@@ -73,7 +73,7 @@ public class DirectedGraphView<V, E extends GraphEdge<V>> implements DirectedGra
 	}
 
 	@Override
-	public DirectedGraph<V, E> withExcluded(Set<V> excluded) {
+	public DirectedGraph<V, E> withoutExcluded(Set<V> excluded) {
 		throw new UnsupportedOperationException();
 	}
 	

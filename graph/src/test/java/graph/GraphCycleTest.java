@@ -1,8 +1,6 @@
 package graph;
 
 import static org.junit.Assert.*;
-import graph.dep.DependencyBuilder;
-import graph.dep.IDependencyBuilder;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -10,7 +8,11 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.DependencyBuilder;
+import com.github.nill14.parsers.dependency.IDependencyBuilder;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
@@ -20,6 +22,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class GraphCycleTest {
+	
+	private static final Logger log = LoggerFactory.getLogger(GraphCycleTest.class);
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
@@ -131,7 +135,7 @@ public class GraphCycleTest {
 		Collection<Deque<Module>> cycles = new GraphCycleDetector<>(graph).getNontrivialCycles();
 		
 		
-		System.out.println(cycles);
+		log.info("{}", cycles);
 		assertEquals(3, cycles.size());
 	}
 

@@ -1,21 +1,18 @@
-package graph.dep;
-
-import graph.impl.DefaultDirectedGraph;
-import graph.impl.EvaluatedGraphEdge;
+package com.github.nill14.parsers.dependency;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.graph.impl.DefaultDirectedGraph;
+import com.github.nill14.parsers.graph.impl.EvaluatedGraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
-import com.github.nill14.parsers.graph.utils.GraphWalker;
-import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
-import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -23,9 +20,16 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 
 public class DependencyBuilder<Module extends IDependencyCollector> implements IDependencyBuilder<Module> {
+	
+	private static final Logger log = LoggerFactory.getLogger(DependencyBuilder.class);
 
 	private final Set<Module> modules;
 	private final DirectedGraph<Module, GraphEdge<Module>> graph;
+	
+	public DependencyBuilder(DirectedGraph<Module, GraphEdge<Module>> graph) {
+		this.graph = graph;
+		this.modules = graph.nodes();
+	}
 
 	public DependencyBuilder(Set<Module> collectors) {
 		modules = collectors;
@@ -55,7 +59,7 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 			for (Module source : from) {
 				for (Module target : to) {
 					GraphEdge<Module> edge = EvaluatedGraphEdge.edge(source, target);
-					System.out.println(source + "->" + target);
+					log.debug("{} -> {}", source, target);
 					edges.add(edge);
 				}
 			}
@@ -84,47 +88,8 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 	}
 	
 	@Override
-	public List<Module> getTopologicalOrder() throws CyclicGraphException {
-		return new LongestPathTopoSorter<>(graph).getLongestPathTopologicalOrdering();
-	}
-	
-	@Override
-	public void walkGraph(final ExecutorService executor,
-			final ModuleConsumer<Module> moduleConsumer)
-			throws ParallelExecutionException {
-		
-		final GraphWalker<Module> graphWalker = new GraphWalker<>(graph);
-		
-		for (final Module module : graphWalker) {
-			graphWalker.checkFailure();
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						moduleConsumer.process(module);
-						graphWalker.onComplete(module);
-					} catch (Exception e) {
-						graphWalker.onFailure(e);
-					}
-				}
-			});
-		}
-		graphWalker.awaitCompletion();
-	}
-	
-	@Override
-	public void walkGraph(ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException {
-		GraphWalker<Module> graphWalker = new GraphWalker<>(graph);
-		
-		for (Module module : graphWalker) {
-			try {
-				moduleConsumer.process(module);
-				graphWalker.onComplete(module);
-			} catch (Exception e) {
-				throw new ParallelExecutionException(e);
-			}
-		}
-		
+	public IDependencyWalker<Module> buildWalker() throws CyclicGraphException {
+		return new DependencyWalker<>(graph);
 	}
 	
 }

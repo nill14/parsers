@@ -1,4 +1,4 @@
-package graph.impl;
+package com.github.nill14.parsers.graph.impl;
 
 import com.github.nill14.parsers.graph.GraphEdge;
 

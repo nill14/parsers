@@ -5,7 +5,7 @@ import java.util.Deque;
 
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 
-public class CyclicGraphException extends RuntimeException {
+public class CyclicGraphException extends Exception {
 
 	private static final long serialVersionUID = -7597034956726693125L;
 	

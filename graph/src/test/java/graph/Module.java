@@ -1,9 +1,9 @@
 package graph;
 
-import graph.dep.DependencyCollector;
-import graph.dep.IDependencyCollector;
-
 import java.util.List;
+
+import com.github.nill14.parsers.dependency.DependencyCollector;
+import com.github.nill14.parsers.dependency.IDependencyCollector;
 
 public class Module implements IDependencyCollector {
 	
@@ -39,7 +39,7 @@ public class Module implements IDependencyCollector {
 	
 	public static class Builder {
 		
-		private final graph.dep.DependencyCollector.Builder builder;
+		private final com.github.nill14.parsers.dependency.DependencyCollector.Builder builder;
 		
 		public Builder(String name) {
 			builder = DependencyCollector.builder(name);
