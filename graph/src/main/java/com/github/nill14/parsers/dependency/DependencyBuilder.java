@@ -68,17 +68,17 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 				}
 				for (Module source : from) {
 					GraphEdge<Module> edge = EvaluatedGraphEdge.edge(source, target);
-					log.debug("{} -> {}", source, target);
+					log.info("({}) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
 			}
 			
-			Set<Module> toOpt = consumers.get(key);
+			Set<Module> toOpt = consumersOpt.get(key);
 			
 			for (Module target : toOpt) {
 				for (Module source : from) {
 					GraphEdge<Module> edge = EvaluatedGraphEdge.edge(source, target);
-					log.debug("{} -> {}", source, target);
+					log.info("({} opt) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
 			}

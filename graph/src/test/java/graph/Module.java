@@ -54,6 +54,12 @@ public class Module implements IDependencyCollector {
 			builder.dependsOn(fqn);
 			return this;
 		}
+
+		public Builder consumesOpt(String fqn) {
+			builder.dependsOnOptionally(fqn);
+			return this;
+		}
+		
 		
 		public Builder produces(String fqn) {
 			builder.provides(fqn);

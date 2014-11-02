@@ -42,7 +42,7 @@ public class GraphOrderTest {
 	public void init() throws DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.consumes("M")
+				.consumesOpt("M")
 				.build(),
 			Module.builder("B")
 				.consumes("A")

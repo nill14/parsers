@@ -53,11 +53,10 @@ public class GraphCycleTest {
 				
 			//cycle	
 			Module.builder("E")
-				.consumes("G")
+				.consumesOpt("G")
 				.build(),	
 			Module.builder("F")
 				.consumes("E")
-				.produces("F")
 				.build(),
 			Module.builder("G")
 				.consumes("F")
@@ -67,7 +66,7 @@ public class GraphCycleTest {
 				.consumes("C")
 				.build(),
 			Module.builder("I")
-				.consumes("C")
+				.consumesOpt("C")
 				.build(),
 			Module.builder("J")
 				.produces("A")
