@@ -62,6 +62,8 @@ public final class DependencyCollector implements IDependencyCollector {
 		
 		/**
 		 * consumes, dependsOn 
+		 * @param clazz a service provider 
+		 * @return self
 		 */
 		public Builder dependsOn(Class<?> clazz) {
 			return dependsOn(clazz.getName());
@@ -69,6 +71,8 @@ public final class DependencyCollector implements IDependencyCollector {
 		
 		/**
 		 * consumes, dependsOn (optionally)
+		 * @param clazz a service provider 
+		 * @return self
 		 */
 		public Builder dependsOnOptionally(Class<?> clazz) {
 			return dependsOnOptionally(clazz.getName());
@@ -76,6 +80,8 @@ public final class DependencyCollector implements IDependencyCollector {
 		
 		/**
 		 * provides or isPrerequisiteOf
+		 * @param clazz a service provider 
+		 * @return self
 		 */
 		public Builder provides(Class<?> clazz) {
 			return provides(clazz.getName());

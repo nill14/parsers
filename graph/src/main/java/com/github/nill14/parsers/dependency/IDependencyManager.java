@@ -32,10 +32,19 @@ public interface IDependencyManager<Module extends IDependencyCollector> {
 	
 	String getDependencyHierarchy();
 
+	/**
+	 * 
+	 * @param executor an executor to be used for executing the closure
+	 * @param moduleConsumer a processing closure
+	 * @throws ParallelExecutionException when the closure throws an exception
+	 */
 	void walkGraph(ExecutorService executor, ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
 
 	/**
 	 * Synchronous version of {@link #walkGraph(ExecutorService, ModuleConsumer)}
+	 * 
+	 * @param moduleConsumer a processing closure
+	 * @throws ParallelExecutionException when the closure throws an exception
 	 */
 	void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
 }

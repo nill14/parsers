@@ -14,9 +14,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 /**
  * 
- * @see http://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
+ * http://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
  *
- * @param <T>
+ * @param <V> Vertex
  */
 public class GraphCycleDetector<V> {
 

@@ -107,7 +107,7 @@ public class DependencyBuilder<Module extends IDependencyCollector> implements I
 	}
 	
 	@Override
-	public IDependencyManager<Module> buildWalker() throws CyclicGraphException {
+	public IDependencyManager<Module> buildManager() throws CyclicGraphException {
 		return new DependencyManager<>(graph);
 	}
 	

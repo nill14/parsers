@@ -1,7 +1,7 @@
 package com.github.nill14.parsers.dependency;
 
-public interface ModuleConsumer<Module extends IDependencyCollector> {
+public interface ModuleConsumer<T> {
 
-	void process(Module module) throws Exception;
+	void process(T module) throws Exception;
 	
 }

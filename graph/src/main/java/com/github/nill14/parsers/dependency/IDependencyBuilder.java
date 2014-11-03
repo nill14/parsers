@@ -22,5 +22,5 @@ public interface IDependencyBuilder<Module extends IDependencyCollector> {
 	
 	Collection<Deque<Module>> getCycles();
 	
-	IDependencyManager<Module> buildWalker() throws CyclicGraphException;
+	IDependencyManager<Module> buildManager() throws CyclicGraphException;
 }

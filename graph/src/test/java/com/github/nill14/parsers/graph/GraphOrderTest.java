@@ -1,4 +1,4 @@
-package graph;
+package com.github.nill14.parsers.graph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -58,8 +58,8 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 
 	/**
 	 * The result is topologically sorted
-	 * @return 
-	 * @throws CyclicGraphException 
+	 * @return A set of (Vertex, count) pairs
+	 * @throws CyclicGraphException when the graph contains cycles
 	 */
 	public LinkedHashMap<V, Integer> getLongestPathMap() throws CyclicGraphException {
 		LinkedList<Vertex<V>> vertices = topologicalOrdering();
@@ -100,7 +100,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	/**
 	 * 
 	 * @return a topologically ordered list
-	 * @throws CyclicGraphException 
+	 * @throws CyclicGraphException when the graph contains cycles
 	 */
 	public List<V> getLongestPathTopologicalOrdering() throws CyclicGraphException {
 		return Lists.newArrayList(getLongestPathMap().keySet());
@@ -109,7 +109,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	/**
 	 * 
 	 * @return a topologically ordered list
-	 * @throws CyclicGraphException 
+	 * @throws CyclicGraphException when the graph contains cycles
 	 */
 	public List<V> getTopologicalOrdering() throws CyclicGraphException {
 		return FluentIterable.from(topologicalOrdering())

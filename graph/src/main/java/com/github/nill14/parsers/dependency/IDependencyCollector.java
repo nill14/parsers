@@ -7,7 +7,7 @@ public interface IDependencyCollector {
 	
 	/**
 	 * a dependsOn(string) or consumes(string)
-	 * @return
+	 * @return a set of dependencies	
 	 */
 	Set<String> getRequiredDependencies();
 	
@@ -18,7 +18,7 @@ public interface IDependencyCollector {
 	 * Nobody is forced to consume the service.
 	 * 
 	 * a isPrerequisiteOf(string) or produces(string)
-	 * @return
+	 * @return a set of providers
 	 */
 	Set<String> getOptionalProviders();
 
