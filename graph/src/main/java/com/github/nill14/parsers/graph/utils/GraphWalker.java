@@ -24,7 +24,7 @@ public class GraphWalker<V> implements Iterable<V> {
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
 	private int lastIndex = 0;
-	private final Set<Exception> failures = Sets.newHashSet();
+	private ParallelExecutionException exception;
 	
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
@@ -61,7 +61,12 @@ public class GraphWalker<V> implements Iterable<V> {
 	public void onFailure(Exception e) {
 	     try {
           lock.lock();
-          this.failures.add(e);
+          if (exception == null) {
+        	  exception = new ParallelExecutionException(e);
+          } else {
+        	  exception.addSuppressed(e);
+          }
+          lockCondition.signal();
           
       } finally {
           lock.unlock();
@@ -73,7 +78,7 @@ public class GraphWalker<V> implements Iterable<V> {
 			lock.lock();
 			
 			while (true) {
-				if (topoList.isEmpty()) {
+				if (topoList.isEmpty() || exception != null) {
 					throw new NoSuchElementException();
 				}
 				
@@ -120,8 +125,8 @@ public class GraphWalker<V> implements Iterable<V> {
 	public void checkFailure() throws ParallelExecutionException {
 	      try {
 	        lock.lock();
-	        if (!failures.isEmpty()) {
-	          throw new ParallelExecutionException(failures);
+	        if (exception != null) {
+	          throw exception;
 	        }
 	        
 	    } finally {

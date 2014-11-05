@@ -2,6 +2,7 @@ package com.github.nill14.parsers.dependency;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService; 	
 
@@ -56,21 +57,27 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 		
 		final GraphWalker<Module> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
-		for (final Module module : graphWalker) {
-			graphWalker.checkFailure();
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						moduleConsumer.process(module);
-						graphWalker.onComplete(module);
-					} catch (Exception e) {
-						graphWalker.onFailure(e);
+		try {
+			for (final Module module : graphWalker) {
+				graphWalker.checkFailure();
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							moduleConsumer.process(module);
+							graphWalker.onComplete(module);
+						} catch (Exception e) {
+							graphWalker.onFailure(e);
+						}
 					}
-				}
-			});
+				});
+			}
+			graphWalker.awaitCompletion();
+			
+		} catch (NoSuchElementException e) {
+			//see test GraphWalkerTest#testExhaustException
+			graphWalker.checkFailure();
 		}
-		graphWalker.awaitCompletion();
 	}
 	
 	@Override

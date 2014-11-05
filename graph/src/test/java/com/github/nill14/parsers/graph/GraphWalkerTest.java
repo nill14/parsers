@@ -192,11 +192,7 @@ public class GraphWalkerTest {
 				@Override
 				public void process(Module module) throws Exception {
 					log.info("Starting module {}", module);
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					Thread.sleep(1);
 					log.info("Completing module {}", module);
 					if (count.incrementAndGet() == 5) {
 						throw new IOException("test checked exception");
@@ -220,4 +216,38 @@ public class GraphWalkerTest {
 		log.info(walker.getDependencyHierarchy());
 	}
 
+	@Test
+	public void testExhaustException() throws InterruptedException, IOException {
+		final AtomicInteger count = new AtomicInteger();
+		
+		thrown.expect(IOException.class);
+		thrown.expectMessage("test checked exception");
+		
+		try {
+			walker.walkGraph(executor, new ModuleConsumer<Module>() {
+				
+				@Override
+				public void process(Module module) throws Exception {
+					log.info("Starting module {}", module);
+					Thread.sleep(100);
+					log.info("Completing module {}", module);
+					if (count.incrementAndGet() == 1) {
+						//wait until we park with lockCondition
+						Thread.sleep(200);
+						throw new IOException("test checked exception");
+					};
+					
+				}
+			});
+		} catch (ParallelExecutionException e) {
+			if (e.getFailure() instanceof IOException) {
+				throw (IOException) e.getFailure();
+			} else {
+				throw new RuntimeException("Unexpected", e);
+			}
+		}
+		
+		assertEquals(modules.size(), count.get());
+	}
+	
 }
