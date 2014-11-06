@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,10 +25,6 @@ import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
 import com.github.nill14.parsers.dependency.IDependencyManager;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
-import com.github.nill14.parsers.graph.CyclicGraphException;
-import com.github.nill14.parsers.graph.DirectedGraph;
-import com.github.nill14.parsers.graph.GraphEdge;
-import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -134,7 +131,7 @@ public class GraphWalkerTest {
 	}
 	
 	@Test
-	public void testWalk() throws InterruptedException, ParallelExecutionException {
+	public void testWalk() throws InterruptedException, ExecutionException {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
@@ -159,7 +156,7 @@ public class GraphWalkerTest {
 	}
 	
 	@Test
-	public void testWalkSynchronously() throws InterruptedException, ParallelExecutionException {
+	public void testWalkSynchronously() throws InterruptedException, ExecutionException {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
@@ -192,7 +189,7 @@ public class GraphWalkerTest {
 				@Override
 				public void process(Module module) throws Exception {
 					log.info("Starting module {}", module);
-					Thread.sleep(1);
+					Thread.sleep(100);
 					log.info("Completing module {}", module);
 					if (count.incrementAndGet() == 5) {
 						throw new IOException("test checked exception");
@@ -200,9 +197,9 @@ public class GraphWalkerTest {
 					
 				}
 			});
-		} catch (ParallelExecutionException e) {
-			if (e.getFailure() instanceof IOException) {
-				throw (IOException) e.getFailure();
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof IOException) {
+				throw (IOException) e.getCause();
 			} else {
 				throw new RuntimeException("Unexpected", e);
 			}
@@ -229,7 +226,7 @@ public class GraphWalkerTest {
 				@Override
 				public void process(Module module) throws Exception {
 					log.info("Starting module {}", module);
-					Thread.sleep(100);
+					Thread.sleep(1);
 					log.info("Completing module {}", module);
 					if (count.incrementAndGet() == 1) {
 						//wait until we park with lockCondition
@@ -239,9 +236,9 @@ public class GraphWalkerTest {
 					
 				}
 			});
-		} catch (ParallelExecutionException e) {
-			if (e.getFailure() instanceof IOException) {
-				throw (IOException) e.getFailure();
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof IOException) {
+				throw (IOException) e.getCause();
 			} else {
 				throw new RuntimeException("Unexpected", e);
 			}

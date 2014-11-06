@@ -2,11 +2,11 @@ package com.github.nill14.parsers.dependency;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
-import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 
 public interface IDependencyManager<Module extends IDependencyCollector> {
 
@@ -36,15 +36,15 @@ public interface IDependencyManager<Module extends IDependencyCollector> {
 	 * 
 	 * @param executor an executor to be used for executing the closure
 	 * @param moduleConsumer a processing closure
-	 * @throws ParallelExecutionException when the closure throws an exception
+	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void walkGraph(ExecutorService executor, ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
+	void walkGraph(ExecutorService executor, ModuleConsumer<Module> moduleConsumer) throws ExecutionException;
 
 	/**
 	 * Synchronous version of {@link #walkGraph(ExecutorService, ModuleConsumer)}
 	 * 
 	 * @param moduleConsumer a processing closure
-	 * @throws ParallelExecutionException when the closure throws an exception
+	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException;
+	void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ExecutionException;
 }

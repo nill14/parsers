@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.ExecutorService; 	
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphWalker;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
-import com.github.nill14.parsers.graph.utils.ParallelExecutionException;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -53,7 +53,7 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 	@Override
 	public void walkGraph(final ExecutorService executor,
 			final ModuleConsumer<Module> moduleConsumer)
-			throws ParallelExecutionException {
+			throws ExecutionException {
 		
 		final GraphWalker<Module> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
@@ -81,7 +81,7 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 	}
 	
 	@Override
-	public void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ParallelExecutionException {
+	public void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ExecutionException {
 		GraphWalker<Module> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
 		for (Module module : graphWalker) {
@@ -89,7 +89,7 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 				moduleConsumer.process(module);
 				graphWalker.onComplete(module);
 			} catch (Exception e) {
-				throw new ParallelExecutionException(e);
+				throw new ExecutionException(e);
 			}
 		}
 		

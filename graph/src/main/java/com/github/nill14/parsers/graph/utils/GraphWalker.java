@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,7 +25,7 @@ public class GraphWalker<V> implements Iterable<V> {
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
 	private int lastIndex = 0;
-	private ParallelExecutionException exception;
+	private ExecutionException exception;
 	
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
@@ -62,7 +63,7 @@ public class GraphWalker<V> implements Iterable<V> {
 	     try {
           lock.lock();
           if (exception == null) {
-        	  exception = new ParallelExecutionException(e);
+        	  exception = new ExecutionException(e);
           } else {
         	  exception.addSuppressed(e);
           }
@@ -122,7 +123,7 @@ public class GraphWalker<V> implements Iterable<V> {
 		}
 	}
 	
-	public void checkFailure() throws ParallelExecutionException {
+	public void checkFailure() throws ExecutionException {
 	      try {
 	        lock.lock();
 	        if (exception != null) {
@@ -134,7 +135,7 @@ public class GraphWalker<V> implements Iterable<V> {
 	    }
 	}
 	
-	public void awaitCompletion() throws ParallelExecutionException {
+	public void awaitCompletion() throws ExecutionException {
 		try {
 			lock.lock();
 			
