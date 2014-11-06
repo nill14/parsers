@@ -1,4 +1,4 @@
-package com.github.nill14.parsers.dependency;
+package com.github.nill14.parsers.dependency.impl;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -7,6 +7,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
+import com.github.nill14.parsers.dependency.IDependencyGraph;
+import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -19,26 +23,23 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 
-public class DependencyBuilder<K, M extends IDependencyCollector<K>> implements IDependencyBuilder<M> {
+public class DependencyGraphBuilder<K, M extends IModule<K>> implements IDependencyGraphBuilder<M> {
 	
-	private static final Logger log = LoggerFactory.getLogger(DependencyBuilder.class);
+	private static final Logger log = LoggerFactory.getLogger(DependencyGraphBuilder.class);
 
-	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	
-	public DependencyBuilder(DirectedGraph<M, GraphEdge<M>> graph) {
+	public DependencyGraphBuilder(DirectedGraph<M, GraphEdge<M>> graph) {
 		this.graph = graph;
-		this.modules = graph.nodes();
 	}
 
-	public DependencyBuilder(Set<M> collectors) throws DependencyBuildException {
-		modules = collectors;
+	public DependencyGraphBuilder(Set<M> modules) throws UnsatisfiedDependencyException {
 
 		ImmutableSetMultimap.Builder<K, M> consumersBuilder = ImmutableSetMultimap.builder();
 		ImmutableSetMultimap.Builder<K, M> consumersOptBuilder = ImmutableSetMultimap.builder();
 		ImmutableSetMultimap.Builder<K, M> producersBuilder = ImmutableSetMultimap.builder();
 		
-		for (M node : collectors) {
+		for (M node : modules) {
 			for (K consumer : node.getRequiredDependencies()) {
 				consumersBuilder.put(consumer, node);
 			}
@@ -64,7 +65,7 @@ public class DependencyBuilder<K, M extends IDependencyCollector<K>> implements 
 			
 			for (M target : to) {
 				if (from.isEmpty()) {
-					throw new DependencyBuildException(target, key);
+					throw new UnsatisfiedDependencyException(target, key);
 				}
 				for (M source : from) {
 					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
@@ -85,7 +86,7 @@ public class DependencyBuilder<K, M extends IDependencyCollector<K>> implements 
 		}
 		
 		graph = DefaultDirectedGraph.<M, GraphEdge<M>>builder()
-			.nodes(collectors)
+			.nodes(modules)
 			.edges(edges.build())
 			.build();
 	}
@@ -97,18 +98,13 @@ public class DependencyBuilder<K, M extends IDependencyCollector<K>> implements 
 	}
 	
 	@Override
-	public Set<M> getCollectors() {
-		return modules;
-	}
-	
-	@Override
 	public Collection<Deque<M>> getCycles() {
 		return new GraphCycleDetector<>(graph).getNontrivialCycles();
 	}
 	
 	@Override
-	public IDependencyManager<M> buildManager() throws CyclicGraphException {
-		return new DependencyManager<>(graph);
+	public IDependencyGraph<M> buildDependencyGraph() throws CyclicGraphException {
+		return new DependencyGraph<>(graph);
 	}
 	
 }

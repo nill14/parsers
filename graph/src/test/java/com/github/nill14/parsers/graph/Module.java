@@ -2,13 +2,13 @@ package com.github.nill14.parsers.graph;
 
 import java.util.Set;
 
-import com.github.nill14.parsers.dependency.DependencyCollector;
-import com.github.nill14.parsers.dependency.IDependencyCollector;
-import com.github.nill14.parsers.dependency.IDependencyCollectorBuilder;
+import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
+import com.github.nill14.parsers.dependency.impl.DependencyModule;
 
-public class Module implements IDependencyCollector<String> {
+public class Module implements IModule<String> {
 	
-	private final IDependencyCollector<String> collector;
+	private final IModule<String> collector;
 	
 	private Module(Builder builder) {
 		collector = builder.builder.build();
@@ -38,12 +38,12 @@ public class Module implements IDependencyCollector<String> {
 		return collector.toString();
 	}
 	
-	public static class Builder implements IDependencyCollectorBuilder<String> {
+	public static class Builder implements IModuleDependencyBuilder<String> {
 		
-		private final IDependencyCollectorBuilder<String> builder;
+		private final IModuleDependencyBuilder<String> builder;
 		
 		public Builder(String name) {
-			builder = DependencyCollector.builder(name);
+			builder = DependencyModule.builder(name);
 		}
 		
 		public Builder dependsOn(String fqn) {

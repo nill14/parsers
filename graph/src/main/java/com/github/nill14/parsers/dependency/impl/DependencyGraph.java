@@ -1,4 +1,4 @@
-package com.github.nill14.parsers.dependency;
+package com.github.nill14.parsers.dependency.impl;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import com.github.nill14.parsers.dependency.IDependencyGraph;
+import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -15,14 +18,14 @@ import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-class DependencyManager<M extends IDependencyCollector<?>> implements IDependencyManager<M> {
+class DependencyGraph<M extends IModule<?>> implements IDependencyGraph<M> {
 	
 	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	private final LinkedHashMap<M, Integer> longestPathMap;
 	private final List<M> topologicalOrdering;
 	
-	public DependencyManager(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
+	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
 		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();
@@ -36,7 +39,7 @@ class DependencyManager<M extends IDependencyCollector<?>> implements IDependenc
 	}
 	
 	@Override
-	public Set<M> getCollectors() {
+	public Set<M> getModules() {
 		return modules;
 	}
 	
@@ -46,7 +49,7 @@ class DependencyManager<M extends IDependencyCollector<?>> implements IDependenc
 	}
 	
 	@Override
-	public String getDependencyHierarchy() {
+	public String getPrettyPrint() {
 		return Joiner.on("\n").join(longestPathMap.entrySet());
 	}
 	

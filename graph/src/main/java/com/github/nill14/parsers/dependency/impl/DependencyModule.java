@@ -1,10 +1,12 @@
-package com.github.nill14.parsers.dependency;
+package com.github.nill14.parsers.dependency.impl;
 
 import java.util.Set;
 
+import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
 import com.google.common.collect.ImmutableSet;
 
-public final class DependencyCollector<K> implements IDependencyCollector<K> {
+public final class DependencyModule<K> implements IModule<K> {
 	
 	
 	private final ImmutableSet<K> dependencies;
@@ -12,7 +14,7 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 	private final ImmutableSet<K> optProviders;
 	private final K self;
 
-	private DependencyCollector(Builder<K> builder) {
+	private DependencyModule(Builder<K> builder) {
 		dependencies = builder.dependencies.build();
 		optDependencies = builder.optDependencies.build();
 		optProviders = builder.providers.build();
@@ -34,7 +36,7 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 		return optProviders;
 	}
 
-	public static <K> IDependencyCollectorBuilder<K> builder(K self) {
+	public static <K> IModuleDependencyBuilder<K> builder(K self) {
 		return new Builder<>(self);
 	}
 	
@@ -44,7 +46,7 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 		return self.toString();
 	}
 	
-	public static class Builder<K> implements IDependencyCollectorBuilder<K> {
+	public static class Builder<K> implements IModuleDependencyBuilder<K> {
 		
 		private final ImmutableSet.Builder<K> dependencies = ImmutableSet.builder();
 		private final ImmutableSet.Builder<K> optDependencies = ImmutableSet.builder();
@@ -62,7 +64,7 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder<K> dependsOn(K dependency) {
+		public IModuleDependencyBuilder<K> dependsOn(K dependency) {
 			dependencies.add(dependency);
 			return this;
 		}
@@ -73,7 +75,7 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder<K> dependsOnOptionally(K dependency) {
+		public IModuleDependencyBuilder<K> dependsOnOptionally(K dependency) {
 			optDependencies.add(dependency);
 			return this;
 		}
@@ -84,15 +86,15 @@ public final class DependencyCollector<K> implements IDependencyCollector<K> {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder<K> provides(K provider) {
+		public IModuleDependencyBuilder<K> provides(K provider) {
 			providers.add(provider);
 			return this;
 		}
 
 		
 		@Override
-		public IDependencyCollector<K> build() {
-			return new DependencyCollector<>(this);
+		public IModule<K> build() {
+			return new DependencyModule<>(this);
 		}
 	}
 

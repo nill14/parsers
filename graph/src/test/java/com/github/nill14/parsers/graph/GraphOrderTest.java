@@ -15,9 +15,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nill14.parsers.dependency.DependencyBuildException;
-import com.github.nill14.parsers.dependency.DependencyBuilder;
-import com.github.nill14.parsers.dependency.IDependencyBuilder;
+import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
+import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
@@ -32,12 +32,12 @@ public class GraphOrderTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyBuilder<Module> dependencyBuilder;
+	private IDependencyGraphBuilder<Module> dependencyBuilder;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
 	@Before
-	public void init() throws DependencyBuildException {
+	public void init() throws UnsatisfiedDependencyException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.dependsOnOptionally("M")
@@ -83,7 +83,7 @@ public class GraphOrderTest {
 				.build()
 		);		
 		
-		dependencyBuilder = new DependencyBuilder<>(modules);
+		dependencyBuilder = new DependencyGraphBuilder<>(modules);
 		graph = dependencyBuilder.getGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {

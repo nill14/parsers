@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * @param <K> K is an arbitrary type but provides correct {@link #hashCode()} and {@link #equals(Object)}
  */
-public interface IDependencyCollector<K> {
+public interface IModule<K> {
 
 	
 	/**
@@ -16,6 +16,10 @@ public interface IDependencyCollector<K> {
 	 */
 	Set<K> getRequiredDependencies();
 	
+	/**
+	 * a dependsOn(string) or consumes(string)
+	 * @return a set of optional dependencies	
+	 */
 	Set<K> getOptionalDependencies();
 
 	/**

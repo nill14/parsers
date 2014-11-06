@@ -21,11 +21,11 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nill14.parsers.dependency.DependencyBuildException;
-import com.github.nill14.parsers.dependency.DependencyBuilder;
-import com.github.nill14.parsers.dependency.IDependencyBuilder;
-import com.github.nill14.parsers.dependency.IDependencyManager;
+import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
+import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
+import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -38,15 +38,15 @@ public class GraphWalkerTest {
 	private final ExecutorService executor = Executors.newFixedThreadPool(8);
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyBuilder<Module> dependencyBuilder;
-	private IDependencyManager<Module> walker; 
+	private IDependencyGraphBuilder<Module> dependencyBuilder;
+	private IDependencyGraph<Module> walker; 
 	private ImmutableMap<String, Module> moduleIndex;
 
 
 	@Rule public ExpectedException thrown = ExpectedException.none();
 
 	@Before
-	public void init() throws CyclicGraphException, DependencyBuildException {
+	public void init() throws CyclicGraphException, UnsatisfiedDependencyException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.provides("A")
@@ -93,8 +93,8 @@ public class GraphWalkerTest {
 				.build()
 		);		
 		
-		dependencyBuilder = new DependencyBuilder<>(modules);
-		walker = dependencyBuilder.buildManager();
+		dependencyBuilder = new DependencyGraphBuilder<>(modules);
+		walker = dependencyBuilder.buildDependencyGraph();
 		graph = dependencyBuilder.getGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
@@ -211,7 +211,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		log.info(walker.getDependencyHierarchy());
+		log.info(walker.getPrettyPrint());
 	}
 
 	@Test

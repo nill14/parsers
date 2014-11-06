@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 
-public interface IDependencyManager<M extends IDependencyCollector<?>> {
+public interface IDependencyGraph<M extends IModule<?>> {
 
 	/**
 	 * In the graph a dependency relation is modeled by precursors direction
@@ -20,17 +20,17 @@ public interface IDependencyManager<M extends IDependencyCollector<?>> {
 
 	/**
 	 * 
-	 * @return a set of dependency collectors (modules)
+	 * @return a set of modules
 	 */
-	Set<M> getCollectors();
+	Set<M> getModules();
 	
 	/**
 	 * 
-	 * @return a topologically sorted list of collectors
+	 * @return a topologically sorted list of modules
 	 */
 	List<M> getTopologicalOrder();
 	
-	String getDependencyHierarchy();
+	String getPrettyPrint();
 
 	/**
 	 * 
