@@ -27,7 +27,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 
 	private final DirectedGraph<V, E> graph;
 	private final ImmutableMap<V, Vertex<V>> nodeIndex;
-	private final Function<E, Integer> eval;
+	private final Function<E, Integer> edgeEval;
 	private final List<Vertex<V>> vertices;
 	
 	
@@ -40,9 +40,9 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 		});
 	}
 	
-	public LongestPathTopoSorter(DirectedGraph<V, E> acyclicDirectedGraph, Function<E, Integer> eval) {
+	public LongestPathTopoSorter(DirectedGraph<V, E> acyclicDirectedGraph, Function<E, Integer> edgeEval) {
 		this.graph = acyclicDirectedGraph;
-		this.eval = eval;
+		this.edgeEval = edgeEval;
 		vertices = Lists.newArrayList();
 		for (V node : graph.nodes()) {
 		  vertices.add(new Vertex<V>(node));
@@ -55,17 +55,32 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 			}
 		});
 	}
-
+	
 	/**
 	 * The result is topologically sorted
 	 * @return A set of (Vertex, count) pairs
 	 * @throws CyclicGraphException when the graph contains cycles
 	 */
 	public LinkedHashMap<V, Integer> getLongestPathMap() throws CyclicGraphException {
+		return getLongestPathMap(new Function<V, Integer>() {
+			@Override
+			public Integer apply(V input) {
+				return 0;
+			}
+		});
+	}
+
+	/**
+	 * The result is topologically sorted
+	 * @param priorityFunction an optional function for increasing priority in range 0..100000
+	 * @return A set of (Vertex, count) pairs
+	 * @throws CyclicGraphException when the graph contains cycles
+	 */
+	public LinkedHashMap<V, Integer> getLongestPathMap(Function<V, Integer> priorityFunction) throws CyclicGraphException {
 		LinkedList<Vertex<V>> vertices = topologicalOrdering();
 		Collections.reverse(vertices);
 		for (Vertex<V> v : vertices) {
-			visitCount(v);
+			visitCount(v, priorityFunction);
 		}
 		
 		Collections.sort(vertices, new Comparator<Vertex<V>>() {
@@ -82,19 +97,45 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 		return result;
 	}
 	
-	private void visitCount(Vertex<V> n) {
+	private void visitCount(Vertex<V> n, Function<V, Integer> nodePriority) {
+		int nodeValue = evalPriority(n, nodePriority);
 		Collection<E> next = getNextEdges(n);
 		if (next.isEmpty()) {
-			n.depth = 0;
+			n.depth = nodeValue;
 		} else {
 			int max = 0;
 			for (E edge : next) {
 				Vertex<V> m = getVertex(edge.target());
-				int count = eval.apply(edge) + m.depth;
+				int count = evalEdge(edge) + m.depth;
 				max = max(max, count);
 			}
-			n.depth = max;
+			n.depth = max + nodeValue;
 		}
+	}
+	
+	/**
+	 * 
+	 * @param edge
+	 * @return default is 1
+	 */
+	private int evalEdge(E edge) {
+		int val = edgeEval.apply(edge);
+		if (val < 1 || val > 100000) {
+			throw new IllegalArgumentException(String.format("Edge cost must be in range 1..100000: %s", edge, val));
+		}
+		return val;
+	}
+	
+	/**
+	 * @param edge
+	 * @return default is 0
+	 */
+	private int evalPriority(Vertex<V> n, Function<V, Integer> nodePriority) {
+		int val = nodePriority.apply(n.node);
+		if (val < 0 || val > 100000) {
+			throw new IllegalArgumentException(String.format("Node %s priority must be in range 0..100000: %s", n.node, val));
+		}
+		return val;
 	}
 	
 	/**

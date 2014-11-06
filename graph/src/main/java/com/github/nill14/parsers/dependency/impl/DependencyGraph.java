@@ -15,6 +15,7 @@ import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphWalker;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -29,6 +30,13 @@ class DependencyGraph<M extends IModule<?>> implements IDependencyGraph<M> {
 		this.graph = graph;
 		this.modules = graph.nodes();
 		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();
+		topologicalOrdering = ImmutableList.copyOf(longestPathMap.keySet());
+	}
+	
+	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
+		this.graph = graph;
+		this.modules = graph.nodes();
+		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
 		topologicalOrdering = ImmutableList.copyOf(longestPathMap.keySet());
 	}
 
