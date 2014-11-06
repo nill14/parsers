@@ -15,7 +15,7 @@ import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-class DependencyManager<M extends IDependencyCollector> implements IDependencyManager<M> {
+class DependencyManager<M extends IDependencyCollector<?>> implements IDependencyManager<M> {
 	
 	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;

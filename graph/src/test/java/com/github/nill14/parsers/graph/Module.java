@@ -6,9 +6,9 @@ import com.github.nill14.parsers.dependency.DependencyCollector;
 import com.github.nill14.parsers.dependency.IDependencyCollector;
 import com.github.nill14.parsers.dependency.IDependencyCollectorBuilder;
 
-public class Module implements IDependencyCollector {
+public class Module implements IDependencyCollector<String> {
 	
-	private final IDependencyCollector collector;
+	private final IDependencyCollector<String> collector;
 	
 	private Module(Builder builder) {
 		collector = builder.builder.build();
@@ -34,18 +34,13 @@ public class Module implements IDependencyCollector {
 	}
 	
 	@Override
-	public String getName() {
-		return collector.getName();
-	}
-	
-	@Override
 	public String toString() {
-		return getName();
+		return collector.toString();
 	}
 	
-	public static class Builder implements IDependencyCollectorBuilder {
+	public static class Builder implements IDependencyCollectorBuilder<String> {
 		
-		private final IDependencyCollectorBuilder builder;
+		private final IDependencyCollectorBuilder<String> builder;
 		
 		public Builder(String name) {
 			builder = DependencyCollector.builder(name);
@@ -71,23 +66,6 @@ public class Module implements IDependencyCollector {
 			return new Module(this);
 		}
 
-		@Override
-		public IDependencyCollectorBuilder dependsOn(Class<?> clazz) {
-			builder.dependsOn(clazz);
-			return this;
-		}
-
-		@Override
-		public IDependencyCollectorBuilder dependsOnOptionally(Class<?> clazz) {
-			builder.dependsOnOptionally(clazz);
-			return this;
-		}
-
-		@Override
-		public IDependencyCollectorBuilder provides(Class<?> clazz) {
-			builder. provides(clazz);
-			return this;
-		}
 	}
 
 }

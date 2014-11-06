@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
+import com.github.nill14.parsers.dependency.IDependencyBuilder;
 import com.github.nill14.parsers.dependency.IDependencyManager;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.google.common.base.Function;
@@ -37,7 +38,7 @@ public class GraphWalkerTest {
 	private final ExecutorService executor = Executors.newFixedThreadPool(8);
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private DependencyBuilder<Module> dependencyBuilder;
+	private IDependencyBuilder<Module> dependencyBuilder;
 	private IDependencyManager<Module> walker; 
 	private ImmutableMap<String, Module> moduleIndex;
 
@@ -100,7 +101,7 @@ public class GraphWalkerTest {
 
 			@Override
 			public String apply(Module input) {
-				return input.getName();
+				return input.toString();
 			}
 		});
 	}

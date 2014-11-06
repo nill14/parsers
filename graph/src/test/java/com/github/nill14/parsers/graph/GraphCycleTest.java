@@ -92,7 +92,7 @@ public class GraphCycleTest {
 
 			@Override
 			public String apply(Module input) {
-				return input.getName();
+				return input.toString();
 			}
 		});
 		

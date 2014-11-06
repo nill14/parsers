@@ -2,16 +2,21 @@ package com.github.nill14.parsers.dependency;
 
 import java.util.Set;
 
-public interface IDependencyCollector {
+/**
+ * 
+ *
+ * @param <K> K is an arbitrary type but provides correct {@link #hashCode()} and {@link #equals(Object)}
+ */
+public interface IDependencyCollector<K> {
 
 	
 	/**
 	 * a dependsOn(string) or consumes(string)
 	 * @return a set of dependencies	
 	 */
-	Set<String> getRequiredDependencies();
+	Set<K> getRequiredDependencies();
 	
-	Set<String> getOptionalDependencies();
+	Set<K> getOptionalDependencies();
 
 	/**
 	 * All providers (inversive dependency) are optional. 
@@ -20,13 +25,8 @@ public interface IDependencyCollector {
 	 * a isPrerequisiteOf(string) or produces(string)
 	 * @return a set of providers
 	 */
-	Set<String> getOptionalProviders();
-
-	/**
-	 * 
-	 * @return a name of self-provider (included automatically in {@link #getOptionalProviders()}
-	 */
-	String getName();
+	Set<K> getOptionalProviders();
+	
 
 }
 

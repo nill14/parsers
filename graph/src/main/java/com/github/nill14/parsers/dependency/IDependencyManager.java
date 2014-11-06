@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 
-public interface IDependencyManager<M extends IDependencyCollector> {
+public interface IDependencyManager<M extends IDependencyCollector<?>> {
 
 	/**
 	 * In the graph a dependency relation is modeled by precursors direction

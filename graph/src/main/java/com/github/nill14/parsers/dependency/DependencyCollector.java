@@ -4,59 +4,55 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-public final class DependencyCollector implements IDependencyCollector {
+public final class DependencyCollector<K> implements IDependencyCollector<K> {
 	
 	
-	private final ImmutableSet<String> dependencies;
-	private final ImmutableSet<String> optDependencies;
-	private final ImmutableSet<String> optProviders;
-	private final String name;
+	private final ImmutableSet<K> dependencies;
+	private final ImmutableSet<K> optDependencies;
+	private final ImmutableSet<K> optProviders;
+	private final K self;
 
-	private DependencyCollector(Builder builder) {
+	private DependencyCollector(Builder<K> builder) {
 		dependencies = builder.dependencies.build();
 		optDependencies = builder.optDependencies.build();
 		optProviders = builder.providers.build();
-		name = builder.name;
+		self = builder.self;
 	}
 
 	@Override
-	public Set<String> getRequiredDependencies() {
+	public Set<K> getRequiredDependencies() {
 		return dependencies;
 	}
 	
 	@Override
-	public Set<String> getOptionalDependencies() {
+	public Set<K> getOptionalDependencies() {
 		return optDependencies;
 	}
 	
 	@Override
-	public Set<String> getOptionalProviders() {
+	public Set<K> getOptionalProviders() {
 		return optProviders;
 	}
 
-	public static IDependencyCollectorBuilder builder(String name) {
-		return new Builder(name);
+	public static <K> IDependencyCollectorBuilder<K> builder(K self) {
+		return new Builder<>(self);
 	}
 	
-	@Override
-	public String getName() {
-		return name;
-	}
 	
 	@Override
 	public String toString() {
-		return getName();
+		return self.toString();
 	}
 	
-	public static class Builder implements IDependencyCollectorBuilder {
+	public static class Builder<K> implements IDependencyCollectorBuilder<K> {
 		
-		private final ImmutableSet.Builder<String> dependencies = ImmutableSet.builder();
-		private final ImmutableSet.Builder<String> optDependencies = ImmutableSet.builder();
-		private final ImmutableSet.Builder<String> providers = ImmutableSet.builder();
-		private final String name;
+		private final ImmutableSet.Builder<K> dependencies = ImmutableSet.builder();
+		private final ImmutableSet.Builder<K> optDependencies = ImmutableSet.builder();
+		private final ImmutableSet.Builder<K> providers = ImmutableSet.builder();
+		private final K self;
 		
-		public Builder(String name) {
-			this.name = name;
+		public Builder(K name) {
+			this.self = name;
 			providers.add(name);
 		}
 		
@@ -66,8 +62,9 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder dependsOn(Class<?> clazz) {
-			return dependsOn(clazz.getName());
+		public IDependencyCollectorBuilder<K> dependsOn(K dependency) {
+			dependencies.add(dependency);
+			return this;
 		}
 		
 		/**
@@ -76,8 +73,9 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder dependsOnOptionally(Class<?> clazz) {
-			return dependsOnOptionally(clazz.getName());
+		public IDependencyCollectorBuilder<K> dependsOnOptionally(K dependency) {
+			optDependencies.add(dependency);
+			return this;
 		}
 		
 		/**
@@ -86,31 +84,15 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @return self
 		 */
 		@Override
-		public IDependencyCollectorBuilder provides(Class<?> clazz) {
-			return provides(clazz.getName());
+		public IDependencyCollectorBuilder<K> provides(K provider) {
+			providers.add(provider);
+			return this;
 		}
 
-		@Override
-		public IDependencyCollectorBuilder dependsOn(String fqn) {
-			dependencies.add(fqn);
-			return this;
-		}
 		
 		@Override
-		public IDependencyCollectorBuilder dependsOnOptionally(String fqn) {
-			optDependencies.add(fqn);
-			return this;
-		}
-		
-		@Override
-		public IDependencyCollectorBuilder provides(String fqn) {
-			providers.add(fqn);
-			return this;
-		}
-		
-		@Override
-		public IDependencyCollector build() {
-			return new DependencyCollector(this);
+		public IDependencyCollector<K> build() {
+			return new DependencyCollector<>(this);
 		}
 	}
 

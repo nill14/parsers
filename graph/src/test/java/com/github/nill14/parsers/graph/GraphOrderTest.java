@@ -17,9 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.DependencyBuildException;
 import com.github.nill14.parsers.dependency.DependencyBuilder;
-import com.github.nill14.parsers.graph.CyclicGraphException;
-import com.github.nill14.parsers.graph.DirectedGraph;
-import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.dependency.IDependencyBuilder;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
@@ -34,7 +32,7 @@ public class GraphOrderTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private DependencyBuilder<Module> dependencyBuilder;
+	private IDependencyBuilder<Module> dependencyBuilder;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
@@ -92,7 +90,7 @@ public class GraphOrderTest {
 
 			@Override
 			public String apply(Module input) {
-				return input.getName();
+				return input.toString();
 			}
 		});
 	}

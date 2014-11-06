@@ -5,21 +5,23 @@ public class DependencyBuildException extends Exception {
 	
 	private static final long serialVersionUID = -1559542704169025088L;
 
-	private final IDependencyCollector module;
-	private final String dependency;
+	private final IDependencyCollector<?> module;
+	private final Object dependency;
 
-	public DependencyBuildException(IDependencyCollector module, String dependency) {
-		super(String.format("%s misses required dependency %s", module.getName(), dependency));
+	public <K> DependencyBuildException(IDependencyCollector<K> module, K dependency) {
+		super(String.format("%s misses required dependency %s", module, dependency));
 		this.module = module;
-		this.dependency = dependency;;
+		this.dependency = dependency;
 	}
 	
-	public IDependencyCollector getModule() {
-		return module;
+	@SuppressWarnings("unchecked")
+	public <K> IDependencyCollector<K> getModule() {
+		return (IDependencyCollector<K>) module;
 	}
 	
-	public String getDependency() {
-		return dependency;
+	@SuppressWarnings("unchecked")
+	public <K> K getDependency() {
+		return (K) dependency;
 	}
 
 }
