@@ -48,15 +48,15 @@ public class GraphWalkerTest {
 	public void init() throws CyclicGraphException, DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.produces("A")
-				.consumes("M")
+				.provides("A")
+				.dependsOn("M")
 				.build(),
 			Module.builder("B")
-				.consumes("A")
+				.dependsOn("A")
 				.build(),
 			Module.builder("C")
-				.consumes("A")
-				.consumes("B")
+				.dependsOn("A")
+				.dependsOn("B")
 				.build(),	
 				
 			//not connected	
@@ -66,26 +66,26 @@ public class GraphWalkerTest {
 			Module.builder("E")
 				.build(),	
 			Module.builder("F")
-				.consumes("E")
+				.dependsOn("E")
 				.build(),
 			Module.builder("G")
-				.consumes("F")
+				.dependsOn("F")
 				.build(),
 				
 			Module.builder("H")
-				.consumes("C")
+				.dependsOn("C")
 				.build(),
 			Module.builder("I")
-				.consumes("C")
+				.dependsOn("C")
 				.build(),
 			Module.builder("J")
-				.produces("A")
+				.provides("A")
 				.build(),
 				
 			Module.builder("K")
 				.build(),
 			Module.builder("L")
-				.consumes("K")
+				.dependsOn("K")
 				.build(),
 				
 			Module.builder("M")

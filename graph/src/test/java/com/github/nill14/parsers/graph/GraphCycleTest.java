@@ -37,14 +37,14 @@ public class GraphCycleTest {
 	public void init() throws DependencyBuildException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.consumes("M")
+				.dependsOn("M")
 				.build(),
 			Module.builder("B")
-				.consumes("A")
+				.dependsOn("A")
 				.build(),
 			Module.builder("C")
-				.consumes("A")
-				.consumes("B")
+				.dependsOn("A")
+				.dependsOn("B")
 				.build(),	
 				
 			//not connected	
@@ -53,35 +53,35 @@ public class GraphCycleTest {
 				
 			//cycle	
 			Module.builder("E")
-				.consumesOpt("G")
+				.dependsOnOptionally("G")
 				.build(),	
 			Module.builder("F")
-				.consumes("E")
+				.dependsOn("E")
 				.build(),
 			Module.builder("G")
-				.consumes("F")
+				.dependsOn("F")
 				.build(),
 				
 			Module.builder("H")
-				.consumes("C")
+				.dependsOn("C")
 				.build(),
 			Module.builder("I")
-				.consumesOpt("C")
+				.dependsOnOptionally("C")
 				.build(),
 			Module.builder("J")
-				.produces("A")
+				.provides("A")
 				.build(),
 				
 			// another cycle	
 			Module.builder("K")
-				.consumes("L")
+				.dependsOn("L")
 				.build(),
 			Module.builder("L")
-				.consumes("K")
+				.dependsOn("K")
 				.build(),
 				
 			Module.builder("M")
-				.consumes("H")
+				.dependsOn("H")
 				.build()
 		);		
 

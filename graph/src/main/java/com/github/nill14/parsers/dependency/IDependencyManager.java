@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 
-public interface IDependencyManager<Module extends IDependencyCollector> {
+public interface IDependencyManager<M extends IDependencyCollector> {
 
 	/**
 	 * In the graph a dependency relation is modeled by precursors direction
@@ -16,19 +16,19 @@ public interface IDependencyManager<Module extends IDependencyCollector> {
 	 * The foremost right element depends on it's precursors
 	 * @return directed acyclic graph
 	 */
-	DirectedGraph<Module, GraphEdge<Module>> getGraph();
+	DirectedGraph<M, GraphEdge<M>> getGraph();
 
 	/**
 	 * 
 	 * @return a set of dependency collectors (modules)
 	 */
-	Set<Module> getCollectors();
+	Set<M> getCollectors();
 	
 	/**
 	 * 
 	 * @return a topologically sorted list of collectors
 	 */
-	List<Module> getTopologicalOrder();
+	List<M> getTopologicalOrder();
 	
 	String getDependencyHierarchy();
 
@@ -38,7 +38,7 @@ public interface IDependencyManager<Module extends IDependencyCollector> {
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void walkGraph(ExecutorService executor, ModuleConsumer<Module> moduleConsumer) throws ExecutionException;
+	void walkGraph(ExecutorService executor, ModuleConsumer<M> moduleConsumer) throws ExecutionException;
 
 	/**
 	 * Synchronous version of {@link #walkGraph(ExecutorService, ModuleConsumer)}
@@ -46,5 +46,5 @@ public interface IDependencyManager<Module extends IDependencyCollector> {
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ExecutionException;
+	void iterateTopoOrder(ModuleConsumer<M> moduleConsumer) throws ExecutionException;
 }

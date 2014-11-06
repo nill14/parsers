@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.github.nill14.parsers.dependency.DependencyCollector;
 import com.github.nill14.parsers.dependency.IDependencyCollector;
+import com.github.nill14.parsers.dependency.IDependencyCollectorBuilder;
 
 public class Module implements IDependencyCollector {
 	
@@ -42,32 +43,50 @@ public class Module implements IDependencyCollector {
 		return getName();
 	}
 	
-	public static class Builder {
+	public static class Builder implements IDependencyCollectorBuilder {
 		
-		private final com.github.nill14.parsers.dependency.DependencyCollector.Builder builder;
+		private final IDependencyCollectorBuilder builder;
 		
 		public Builder(String name) {
 			builder = DependencyCollector.builder(name);
 		}
 		
-		public Builder consumes(String fqn) {
+		public Builder dependsOn(String fqn) {
 			builder.dependsOn(fqn);
 			return this;
 		}
 
-		public Builder consumesOpt(String fqn) {
+		public Builder dependsOnOptionally(String fqn) {
 			builder.dependsOnOptionally(fqn);
 			return this;
 		}
 		
 		
-		public Builder produces(String fqn) {
+		public Builder provides(String fqn) {
 			builder.provides(fqn);
 			return this;
 		}		
 		
 		public Module build() {
 			return new Module(this);
+		}
+
+		@Override
+		public IDependencyCollectorBuilder dependsOn(Class<?> clazz) {
+			builder.dependsOn(clazz);
+			return this;
+		}
+
+		@Override
+		public IDependencyCollectorBuilder dependsOnOptionally(Class<?> clazz) {
+			builder.dependsOnOptionally(clazz);
+			return this;
+		}
+
+		@Override
+		public IDependencyCollectorBuilder provides(Class<?> clazz) {
+			builder. provides(clazz);
+			return this;
 		}
 	}
 

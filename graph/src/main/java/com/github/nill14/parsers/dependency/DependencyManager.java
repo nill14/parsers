@@ -15,14 +15,14 @@ import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-class DependencyManager<Module extends IDependencyCollector> implements IDependencyManager<Module> {
+class DependencyManager<M extends IDependencyCollector> implements IDependencyManager<M> {
 	
-	private final Set<Module> modules;
-	private final DirectedGraph<Module, GraphEdge<Module>> graph;
-	private final LinkedHashMap<Module, Integer> longestPathMap;
-	private final List<Module> topologicalOrdering;
+	private final Set<M> modules;
+	private final DirectedGraph<M, GraphEdge<M>> graph;
+	private final LinkedHashMap<M, Integer> longestPathMap;
+	private final List<M> topologicalOrdering;
 	
-	public DependencyManager(DirectedGraph<Module, GraphEdge<Module>> graph) throws CyclicGraphException {
+	public DependencyManager(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
 		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();
@@ -31,17 +31,17 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 
 	
 	@Override
-	public DirectedGraph<Module, GraphEdge<Module>> getGraph() {
+	public DirectedGraph<M, GraphEdge<M>> getGraph() {
 		return graph;
 	}
 	
 	@Override
-	public Set<Module> getCollectors() {
+	public Set<M> getCollectors() {
 		return modules;
 	}
 	
 	@Override
-	public List<Module> getTopologicalOrder() {
+	public List<M> getTopologicalOrder() {
 		return topologicalOrdering;
 	}
 	
@@ -52,13 +52,13 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 	
 	@Override
 	public void walkGraph(final ExecutorService executor,
-			final ModuleConsumer<Module> moduleConsumer)
+			final ModuleConsumer<M> moduleConsumer)
 			throws ExecutionException {
 		
-		final GraphWalker<Module> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
+		final GraphWalker<M> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
 		try {
-			for (final Module module : graphWalker) {
+			for (final M module : graphWalker) {
 				graphWalker.checkFailure();
 				executor.execute(new Runnable() {
 					@Override
@@ -81,10 +81,10 @@ class DependencyManager<Module extends IDependencyCollector> implements IDepende
 	}
 	
 	@Override
-	public void iterateTopoOrder(ModuleConsumer<Module> moduleConsumer) throws ExecutionException {
-		GraphWalker<Module> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
+	public void iterateTopoOrder(ModuleConsumer<M> moduleConsumer) throws ExecutionException {
+		GraphWalker<M> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
-		for (Module module : graphWalker) {
+		for (M module : graphWalker) {
 			try {
 				moduleConsumer.process(module);
 				graphWalker.onComplete(module);

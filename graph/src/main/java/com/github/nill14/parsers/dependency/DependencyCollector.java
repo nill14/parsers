@@ -34,7 +34,7 @@ public final class DependencyCollector implements IDependencyCollector {
 		return optProviders;
 	}
 
-	public static Builder builder(String name) {
+	public static IDependencyCollectorBuilder builder(String name) {
 		return new Builder(name);
 	}
 	
@@ -48,7 +48,7 @@ public final class DependencyCollector implements IDependencyCollector {
 		return getName();
 	}
 	
-	public static class Builder {
+	public static class Builder implements IDependencyCollectorBuilder {
 		
 		private final ImmutableSet.Builder<String> dependencies = ImmutableSet.builder();
 		private final ImmutableSet.Builder<String> optDependencies = ImmutableSet.builder();
@@ -65,7 +65,8 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @param clazz a service provider 
 		 * @return self
 		 */
-		public Builder dependsOn(Class<?> clazz) {
+		@Override
+		public IDependencyCollectorBuilder dependsOn(Class<?> clazz) {
 			return dependsOn(clazz.getName());
 		}
 		
@@ -74,7 +75,8 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @param clazz a service provider 
 		 * @return self
 		 */
-		public Builder dependsOnOptionally(Class<?> clazz) {
+		@Override
+		public IDependencyCollectorBuilder dependsOnOptionally(Class<?> clazz) {
 			return dependsOnOptionally(clazz.getName());
 		}
 		
@@ -83,25 +85,30 @@ public final class DependencyCollector implements IDependencyCollector {
 		 * @param clazz a service provider 
 		 * @return self
 		 */
-		public Builder provides(Class<?> clazz) {
+		@Override
+		public IDependencyCollectorBuilder provides(Class<?> clazz) {
 			return provides(clazz.getName());
 		}
 
-		public Builder dependsOn(String fqn) {
+		@Override
+		public IDependencyCollectorBuilder dependsOn(String fqn) {
 			dependencies.add(fqn);
 			return this;
 		}
 		
-		public Builder dependsOnOptionally(String fqn) {
+		@Override
+		public IDependencyCollectorBuilder dependsOnOptionally(String fqn) {
 			optDependencies.add(fqn);
 			return this;
 		}
 		
-		public Builder provides(String fqn) {
+		@Override
+		public IDependencyCollectorBuilder provides(String fqn) {
 			providers.add(fqn);
 			return this;
 		}
 		
+		@Override
 		public IDependencyCollector build() {
 			return new DependencyCollector(this);
 		}
