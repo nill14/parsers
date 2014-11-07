@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
-import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
-import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
-import com.github.nill14.parsers.graph.DirectedGraph;
-import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -28,13 +25,12 @@ public class GraphCycleTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyGraphFactory<Module> dependencyBuilder;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
 
 	@Before
-	public void init() throws UnsatisfiedDependencyException {
+	public void init() throws UnsatisfiedDependencyException, CyclicGraphException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.dependsOn("M")
@@ -85,8 +81,7 @@ public class GraphCycleTest {
 				.buildModule()
 		);		
 
-		dependencyBuilder = DependencyGraphBuilder.newInstance(modules, Module.adapterFunction);
-		graph = dependencyBuilder.getDirectedGraph();
+		graph = DependencyGraphFactory.newGraph(modules, Module.adapterFunction);
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 

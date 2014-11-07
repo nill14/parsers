@@ -1,8 +1,6 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,11 +19,10 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
-import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
-import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
+import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -38,8 +35,7 @@ public class GraphWalkerTest {
 	private final ExecutorService executor = Executors.newFixedThreadPool(8);
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyGraphFactory<Module> dependencyBuilder;
-	private IDependencyGraph<Module> walker; 
+	private IDependencyGraph<Module> dependencyGraph;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
@@ -93,9 +89,8 @@ public class GraphWalkerTest {
 				.buildModule()
 		);		
 		
-		dependencyBuilder = DependencyGraphBuilder.newInstance(modules, Module.adapterFunction);
-		walker = dependencyBuilder.createDependencyGraph();
-		graph = dependencyBuilder.getDirectedGraph();
+		dependencyGraph = DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
+		graph = dependencyGraph.getGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 
@@ -136,7 +131,7 @@ public class GraphWalkerTest {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		walker.walkGraph(executor, new ModuleConsumer<Module>() {
+		dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
@@ -161,7 +156,7 @@ public class GraphWalkerTest {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		walker.iterateTopoOrder(new ModuleConsumer<Module>() {
+		dependencyGraph.iterateTopoOrder(new ModuleConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
@@ -173,7 +168,7 @@ public class GraphWalkerTest {
 		});
 		
 		assertEquals(modules.size(), count.get());
-		assertEquals(walker.getTopologicalOrder(), Lists.newArrayList(executionOrder));
+		assertEquals(dependencyGraph.getTopologicalOrder(), Lists.newArrayList(executionOrder));
 	}	
 	
 	
@@ -185,7 +180,7 @@ public class GraphWalkerTest {
 		thrown.expectMessage("test checked exception");
 		
 		try {
-			walker.walkGraph(executor, new ModuleConsumer<Module>() {
+			dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
 				
 				@Override
 				public void process(Module module) throws Exception {
@@ -211,7 +206,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		log.info(walker.getPrettyPrint());
+		log.info(dependencyGraph.getPrettyPrint());
 	}
 
 	@Test
@@ -222,7 +217,7 @@ public class GraphWalkerTest {
 		thrown.expectMessage("test checked exception");
 		
 		try {
-			walker.walkGraph(executor, new ModuleConsumer<Module>() {
+			dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
 				
 				@Override
 				public void process(Module module) throws Exception {

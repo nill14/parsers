@@ -1,8 +1,6 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -15,9 +13,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
-import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
-import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
@@ -32,12 +30,12 @@ public class GraphOrderTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyGraphFactory<Module> dependencyBuilder;
+	private IDependencyGraph<Module> dependencyBuilder;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
 	@Before
-	public void init() throws UnsatisfiedDependencyException {
+	public void init() throws UnsatisfiedDependencyException, CyclicGraphException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.dependsOnOptionally("M")
@@ -83,8 +81,8 @@ public class GraphOrderTest {
 				.buildModule()
 		);		
 		
-		dependencyBuilder = DependencyGraphBuilder.newInstance(modules, Module.adapterFunction);
-		graph = dependencyBuilder.getDirectedGraph();
+		dependencyBuilder = DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
+		graph = dependencyBuilder.getGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 

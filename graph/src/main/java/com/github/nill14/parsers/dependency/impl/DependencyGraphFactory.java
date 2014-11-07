@@ -1,7 +1,5 @@
 package com.github.nill14.parsers.dependency.impl;
 
-import java.util.Collection;
-import java.util.Deque;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
 import com.github.nill14.parsers.dependency.IModule;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.graph.CyclicGraphException;
@@ -17,7 +14,6 @@ import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.impl.DefaultDirectedGraph;
 import com.github.nill14.parsers.graph.impl.EvaluatedGraphEdge;
-import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
@@ -27,35 +23,53 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 
-public class DependencyGraphBuilder<K, M> implements IDependencyGraphFactory<M> {
+public class DependencyGraphFactory<K, M>  {
 	
-	private static final Logger log = LoggerFactory.getLogger(DependencyGraphBuilder.class);
+	private static final Logger log = LoggerFactory.getLogger(DependencyGraphFactory.class);
 
-	private final DirectedGraph<M, GraphEdge<M>> graph;
-	private final ImmutableMap<M, Integer> priorityMap;
 	
-	
-	public static <K, M> IDependencyGraphFactory<M> newInstance(DirectedGraph<M, GraphEdge<M>> graph, Map<M, Integer> priorityMap) {
-		return new DependencyGraphBuilder<K, M>(graph, priorityMap);
+	public static <K, M> IDependencyGraph<M> newInstance(
+			DirectedGraph<M, GraphEdge<M>> graph, Map<M, Integer> priorityMap) throws UnsatisfiedDependencyException, CyclicGraphException {
+		
+		return new DependencyGraph<>(graph, newPriorityFunction(ImmutableMap.copyOf(priorityMap)));
 	}
 	
-	public static <K, M extends IModule<K>> IDependencyGraphFactory<M> newInstance(Set<M> modules) throws UnsatisfiedDependencyException {
-		Function<M, M> identity = Functions.<M>identity();
-		return new DependencyGraphBuilder<K, M>(modules, identity);
-	}
-	
-	public static <K, M> IDependencyGraphFactory<M> newInstance(Set<M> modules, Function<M, ? extends IModule<K>> adapterFunction) throws UnsatisfiedDependencyException {
-		return new DependencyGraphBuilder<K, M>(modules, adapterFunction);
-	}
 
-	private DependencyGraphBuilder(DirectedGraph<M, GraphEdge<M>> graph, Map<M, Integer> priorityMap) {
-		this.graph = graph;
-		this.priorityMap = ImmutableMap.copyOf(priorityMap);
+	public static <K, M extends IModule<K>> IDependencyGraph<M> newInstance(
+			Set<M> modules) 
+					throws UnsatisfiedDependencyException, CyclicGraphException {
+		
+		return newInstance(modules, Functions.<M>identity());
 	}
 	
-	private DependencyGraphBuilder(Set<M> modules, Function<M, ? extends IModule<K>> adapterFunction) throws UnsatisfiedDependencyException {
+	
+	public static <K, M> IDependencyGraph<M> newInstance(
+			Set<M> modules, Function<M, ? extends IModule<K>> adapterFunction) 
+					throws UnsatisfiedDependencyException, CyclicGraphException {
+		
+		Function<M, Integer> priorityFunction = newPriorityFunction(modules, adapterFunction);
+		DirectedGraph<M, GraphEdge<M>> graph = newGraph(modules, adapterFunction);
+		
+		return new DependencyGraph<>(graph, priorityFunction);
+	}
+	
+	
+	private static <K, M> Function<M, Integer> newPriorityFunction(Set<M> modules, Function<M, ? extends IModule<K>> adapterFunction) throws UnsatisfiedDependencyException {
 		
 		ImmutableMap.Builder<M, Integer> priorityMapBuilder = ImmutableMap.builder();
+		
+		for (M module : modules) {
+			IModule<K> node = adapterFunction.apply(module);
+			priorityMapBuilder.put(module, node.getModulePriority());
+		}
+		
+		return newPriorityFunction(priorityMapBuilder.build());
+	}
+	
+	public static <K, M> DirectedGraph<M, GraphEdge<M>> newGraph(
+			Set<M> modules, Function<M, ? extends IModule<K>> adapterFunction) 
+					throws UnsatisfiedDependencyException {
+		
 		ImmutableSetMultimap.Builder<K, M> consumersBuilder = ImmutableSetMultimap.builder();
 		ImmutableSetMultimap.Builder<K, M> consumersOptBuilder = ImmutableSetMultimap.builder();
 		ImmutableSetMultimap.Builder<K, M> producersBuilder = ImmutableSetMultimap.builder();
@@ -73,8 +87,6 @@ public class DependencyGraphBuilder<K, M> implements IDependencyGraphFactory<M> 
 			for (K producer : node.getOptionalProviders()) {
 				producersBuilder.put(producer, module);
 			}
-			
-			priorityMapBuilder.put(module, node.getModulePriority());
 		}
 		
 		SetMultimap<K, M> consumers = consumersBuilder.build();
@@ -109,29 +121,13 @@ public class DependencyGraphBuilder<K, M> implements IDependencyGraphFactory<M> 
 			}
 		}
 		
-		priorityMap = priorityMapBuilder.build();
-		graph = DefaultDirectedGraph.<M, GraphEdge<M>>builder()
+		return DefaultDirectedGraph.<M, GraphEdge<M>>builder()
 			.nodes(modules)
 			.edges(edges.build())
 			.build();
 	}
-	
-	@Override
-	public DirectedGraph<M, GraphEdge<M>> getDirectedGraph() {
-		return graph;
-	}
-	
-	@Override
-	public Collection<Deque<M>> getGraphCycles() {
-		return new GraphCycleDetector<>(graph).getNontrivialCycles();
-	}
-	
-	@Override
-	public IDependencyGraph<M> createDependencyGraph() throws CyclicGraphException {
-		return new DependencyGraph<>(graph, newPriorityFunction());
-	}
 
-	private Function<M, Integer> newPriorityFunction() {
+	private static <M> Function<M, Integer> newPriorityFunction(final ImmutableMap<M, Integer> priorityMap) {
 		return new Function<M, Integer>() {
 			@Override
 			public Integer apply(M input) {
