@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * 
  *
- * @param <K> K is an arbitrary type but provides correct {@link #hashCode()} and {@link #equals(Object)}
+ * K is an arbitrary type but provides correct {@link Object#hashCode()} and {@link Object#equals(Object)}
  */
 public interface IModule<K> {
 

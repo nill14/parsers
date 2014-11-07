@@ -5,21 +5,21 @@ public interface IModuleDependencyBuilder<K> {
 
 	/**
 	 * consumes, dependsOn 
-	 * @param T a service provider 
+	 * @param dependency a service provider 
 	 * @return self
 	 */
 	IModuleDependencyBuilder<K> dependsOn(K dependency);
 
 	/**
 	 * consumes, dependsOn (optionally)
-	 * @param T a service provider 
+	 * @param dependency a service provider 
 	 * @return self
 	 */
 	IModuleDependencyBuilder<K> dependsOnOptionally(K dependency);
 
 	/**
 	 * provides or isPrerequisiteOf
-	 * @param T a service provider 
+	 * @param service a service provider 
 	 * @return self
 	 */
 	IModuleDependencyBuilder<K> provides(K service);

@@ -70,33 +70,18 @@ public final class DependencyModule<K> implements IModule<K> {
 			providers.add(name);
 		}
 		
-		/**
-		 * consumes, dependsOn 
-		 * @param clazz a service provider 
-		 * @return self
-		 */
 		@Override
 		public IModuleDependencyBuilder<K> dependsOn(K dependency) {
 			dependencies.add(dependency);
 			return this;
 		}
 		
-		/**
-		 * consumes, dependsOn (optionally)
-		 * @param clazz a service provider 
-		 * @return self
-		 */
 		@Override
 		public IModuleDependencyBuilder<K> dependsOnOptionally(K dependency) {
 			optDependencies.add(dependency);
 			return this;
 		}
 		
-		/**
-		 * provides or isPrerequisiteOf
-		 * @param clazz a service provider 
-		 * @return self
-		 */
 		@Override
 		public IModuleDependencyBuilder<K> provides(K provider) {
 			providers.add(provider);
