@@ -1,12 +1,11 @@
 package com.github.nill14.parsers.graph;
 
-import java.util.Set;
-
 import com.github.nill14.parsers.dependency.IModule;
 import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
 import com.github.nill14.parsers.dependency.impl.DependencyModule;
+import com.google.common.base.Function;
 
-public class Module implements IModule<String> {
+public class Module {
 	
 	private final IModule<String> collector;
 	
@@ -18,26 +17,6 @@ public class Module implements IModule<String> {
 		return collector;
 	}
 	
-	@Override
-	public Set<String> getRequiredDependencies() {
-		return collector.getRequiredDependencies();
-	}
-
-	@Override
-	public Set<String> getOptionalDependencies() {
-		return collector.getOptionalDependencies();
-	}
-	
-	@Override
-	public Set<String> getOptionalProviders() {
-		return collector.getOptionalProviders();
-	}
-	
-	@Override
-	public int getModulePriority() {
-		return collector.getModulePriority();
-	}
-	
 	public static Builder builder(String name) {
 		return new Builder(name);
 	}
@@ -46,6 +25,14 @@ public class Module implements IModule<String> {
 	public String toString() {
 		return collector.toString();
 	}
+	
+	public static final Function<Module, IModule<String>> adapterFunction = new Function<Module, IModule<String>>() {
+		
+		@Override
+		public IModule<String> apply(Module input) {
+			return input.getCollector();
+		}
+	};
 	
 	public static class Builder implements IModuleDependencyBuilder<String> {
 		

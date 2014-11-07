@@ -85,7 +85,7 @@ public class GraphCycleTest {
 				.buildModule()
 		);		
 
-		dependencyBuilder = new DependencyGraphBuilder<>(modules);
+		dependencyBuilder = DependencyGraphBuilder.newInstance(modules, Module.adapterFunction);
 		graph = dependencyBuilder.getDirectedGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {

@@ -7,7 +7,7 @@ import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 
-public interface IDependencyGraphFactory<M extends IModule<?>> {
+public interface IDependencyGraphFactory<M> {
 
 	/**
 	 * In the graph a dependency relation is modeled by precursors direction

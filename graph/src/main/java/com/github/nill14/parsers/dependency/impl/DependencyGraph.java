@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.IModule;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -21,7 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-class DependencyGraph<M extends IModule<?>> implements IDependencyGraph<M> {
+class DependencyGraph<M> implements IDependencyGraph<M> {
 	
 	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;

@@ -93,7 +93,7 @@ public class GraphWalkerTest {
 				.buildModule()
 		);		
 		
-		dependencyBuilder = new DependencyGraphBuilder<>(modules);
+		dependencyBuilder = DependencyGraphBuilder.newInstance(modules, Module.adapterFunction);
 		walker = dependencyBuilder.createDependencyGraph();
 		graph = dependencyBuilder.getDirectedGraph();
 		
