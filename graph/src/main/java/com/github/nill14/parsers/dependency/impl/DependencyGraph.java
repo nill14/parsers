@@ -16,7 +16,6 @@ import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphWalker;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
@@ -60,11 +59,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	@Override
 	public Map<M, Integer> getModuleRatings() {
 		return Maps.newLinkedHashMap(moduleRatings);
-	}
-	
-	@Override
-	public String getPrettyPrint() {
-		return Joiner.on("\n").join(moduleRatings.entrySet());
 	}
 	
 	@Override

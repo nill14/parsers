@@ -24,6 +24,7 @@ import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -206,7 +207,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		log.info(dependencyGraph.getPrettyPrint());
+		log.info(Joiner.on("\n").join(dependencyGraph.getModuleRatings().entrySet()));
 	}
 
 	@Test
