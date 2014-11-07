@@ -2,6 +2,7 @@ package com.github.nill14.parsers.dependency.impl;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -18,26 +19,27 @@ import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 class DependencyGraph<M extends IModule<?>> implements IDependencyGraph<M> {
 	
 	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;
-	private final LinkedHashMap<M, Integer> longestPathMap;
+	private final LinkedHashMap<M, Integer> moduleRatings;
 	private final List<M> topologicalOrdering;
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
-		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap();
-		topologicalOrdering = ImmutableList.copyOf(longestPathMap.keySet());
+		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
+		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
 	}
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
-		longestPathMap = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
-		topologicalOrdering = ImmutableList.copyOf(longestPathMap.keySet());
+		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
+		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
 	}
 
 	
@@ -57,8 +59,13 @@ class DependencyGraph<M extends IModule<?>> implements IDependencyGraph<M> {
 	}
 	
 	@Override
+	public Map<M, Integer> getModuleRatings() {
+		return Maps.newLinkedHashMap(moduleRatings);
+	}
+	
+	@Override
 	public String getPrettyPrint() {
-		return Joiner.on("\n").join(longestPathMap.entrySet());
+		return Joiner.on("\n").join(moduleRatings.entrySet());
 	}
 	
 	@Override

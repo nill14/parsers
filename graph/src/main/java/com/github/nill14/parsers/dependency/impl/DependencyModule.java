@@ -13,12 +13,18 @@ public final class DependencyModule<K> implements IModule<K> {
 	private final ImmutableSet<K> optDependencies;
 	private final ImmutableSet<K> optProviders;
 	private final K self;
+	private final int priority;
 
 	private DependencyModule(Builder<K> builder) {
 		dependencies = builder.dependencies.build();
 		optDependencies = builder.optDependencies.build();
 		optProviders = builder.providers.build();
 		self = builder.self;
+		priority = builder.priority;
+		
+		if (priority < 0 || priority > 100000) {
+			throw new IllegalArgumentException("Priority not in range 0..100000: "+ priority);
+		}
 	}
 
 	@Override
@@ -36,6 +42,11 @@ public final class DependencyModule<K> implements IModule<K> {
 		return optProviders;
 	}
 
+	@Override
+	public int getModulePriority() {
+		return priority;
+	}
+	
 	public static <K> IModuleDependencyBuilder<K> builder(K self) {
 		return new Builder<>(self);
 	}
@@ -52,6 +63,7 @@ public final class DependencyModule<K> implements IModule<K> {
 		private final ImmutableSet.Builder<K> optDependencies = ImmutableSet.builder();
 		private final ImmutableSet.Builder<K> providers = ImmutableSet.builder();
 		private final K self;
+		private int priority = 0;
 		
 		public Builder(K name) {
 			this.self = name;
@@ -88,6 +100,12 @@ public final class DependencyModule<K> implements IModule<K> {
 		@Override
 		public IModuleDependencyBuilder<K> provides(K provider) {
 			providers.add(provider);
+			return this;
+		}
+		
+		@Override
+		public IModuleDependencyBuilder<K> modulePriority(int priority) {
+			this.priority = priority;
 			return this;
 		}
 

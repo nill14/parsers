@@ -31,6 +31,7 @@ public interface IModule<K> {
 	 */
 	Set<K> getOptionalProviders();
 	
+	int getModulePriority();
 
 }
 

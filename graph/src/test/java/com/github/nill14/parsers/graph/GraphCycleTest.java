@@ -38,51 +38,51 @@ public class GraphCycleTest {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.dependsOn("M")
-				.build(),
+				.buildModule(),
 			Module.builder("B")
 				.dependsOn("A")
-				.build(),
+				.buildModule(),
 			Module.builder("C")
 				.dependsOn("A")
 				.dependsOn("B")
-				.build(),	
+				.buildModule(),	
 				
 			//not connected	
 			Module.builder("D")
-				.build(),
+				.buildModule(),
 				
 			//cycle	
 			Module.builder("E")
 				.dependsOnOptionally("G")
-				.build(),	
+				.buildModule(),	
 			Module.builder("F")
 				.dependsOn("E")
-				.build(),
+				.buildModule(),
 			Module.builder("G")
 				.dependsOn("F")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("H")
 				.dependsOn("C")
-				.build(),
+				.buildModule(),
 			Module.builder("I")
 				.dependsOnOptionally("C")
-				.build(),
+				.buildModule(),
 			Module.builder("J")
 				.provides("A")
-				.build(),
+				.buildModule(),
 				
 			// another cycle	
 			Module.builder("K")
 				.dependsOn("L")
-				.build(),
+				.buildModule(),
 			Module.builder("L")
 				.dependsOn("K")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("M")
 				.dependsOn("H")
-				.build()
+				.buildModule()
 		);		
 
 		dependencyBuilder = new DependencyGraphBuilder<>(modules);

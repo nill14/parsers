@@ -125,7 +125,11 @@ public class DependencyGraphBuilder<K, M extends IModule<K>> implements IDepende
 		return new Function<M, Integer>() {
 			@Override
 			public Integer apply(M input) {
-				return priorityMap.getOrDefault(input, 0);
+				Integer val = priorityMap.get(input);
+				if (val == null) {
+					return 0;
+				}
+				return val;
 			}
 		};
 	}

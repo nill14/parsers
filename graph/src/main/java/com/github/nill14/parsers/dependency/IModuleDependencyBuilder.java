@@ -24,6 +24,8 @@ public interface IModuleDependencyBuilder<K> {
 	 */
 	IModuleDependencyBuilder<K> provides(K service);
 
+	IModuleDependencyBuilder<K> modulePriority(int priority);
+	
 	IModule<K> build();
 
 }

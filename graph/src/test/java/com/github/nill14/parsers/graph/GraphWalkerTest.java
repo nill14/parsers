@@ -51,46 +51,46 @@ public class GraphWalkerTest {
 			Module.builder("A")
 				.provides("A")
 				.dependsOn("M")
-				.build(),
+				.buildModule(),
 			Module.builder("B")
 				.dependsOn("A")
-				.build(),
+				.buildModule(),
 			Module.builder("C")
 				.dependsOn("A")
 				.dependsOn("B")
-				.build(),	
+				.buildModule(),	
 				
 			//not connected	
 			Module.builder("D")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("E")
-				.build(),	
+				.buildModule(),	
 			Module.builder("F")
 				.dependsOn("E")
-				.build(),
+				.buildModule(),
 			Module.builder("G")
 				.dependsOn("F")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("H")
 				.dependsOn("C")
-				.build(),
+				.buildModule(),
 			Module.builder("I")
 				.dependsOn("C")
-				.build(),
+				.buildModule(),
 			Module.builder("J")
 				.provides("A")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("K")
-				.build(),
+				.buildModule(),
 			Module.builder("L")
 				.dependsOn("K")
-				.build(),
+				.buildModule(),
 				
 			Module.builder("M")
-				.build()
+				.buildModule()
 		);		
 		
 		dependencyBuilder = new DependencyGraphBuilder<>(modules);

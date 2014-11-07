@@ -1,6 +1,7 @@
 package com.github.nill14.parsers.dependency;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +30,15 @@ public interface IDependencyGraph<M extends IModule<?>> {
 	 * @return a topologically sorted list of modules
 	 */
 	List<M> getTopologicalOrder();
+	
+	/**
+	 * Returns module ratings based on longest path algorithm and module priority.
+	 * The modules sorted by ratings descendingly are guaranteed 
+	 * to be in topological order. 
+	 * 
+	 * @return module ratings
+	 */
+	Map<M, Integer> getModuleRatings();
 	
 	String getPrettyPrint();
 
