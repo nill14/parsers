@@ -20,13 +20,12 @@ public class CyclicGraphException extends Exception {
 		this.graph = graph;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	public <V, E extends GraphEdge<V>> DirectedGraph<V, E> getGraph() {
 		return (DirectedGraph<V, E>) graph;
 	}
 	
-	public <V> Collection<Deque<V>> getCycles() {
+	public <V> Collection<Deque<V>> getGraphCycles() {
 		DirectedGraph<V, GraphEdge<V>> graph = getGraph();
 		return new GraphCycleDetector<>(graph).getNontrivialCycles();
 	}

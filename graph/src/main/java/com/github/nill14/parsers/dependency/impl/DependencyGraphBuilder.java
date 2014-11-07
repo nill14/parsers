@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
 import com.github.nill14.parsers.dependency.IModule;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.graph.CyclicGraphException;
@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 
-public class DependencyGraphBuilder<K, M extends IModule<K>> implements IDependencyGraphBuilder<M> {
+public class DependencyGraphBuilder<K, M extends IModule<K>> implements IDependencyGraphFactory<M> {
 	
 	private static final Logger log = LoggerFactory.getLogger(DependencyGraphBuilder.class);
 
@@ -103,17 +103,17 @@ public class DependencyGraphBuilder<K, M extends IModule<K>> implements IDepende
 	
 	
 	@Override
-	public DirectedGraph<M, GraphEdge<M>> getGraph() {
+	public DirectedGraph<M, GraphEdge<M>> getDirectedGraph() {
 		return graph;
 	}
 	
 	@Override
-	public Collection<Deque<M>> getCycles() {
+	public Collection<Deque<M>> getGraphCycles() {
 		return new GraphCycleDetector<>(graph).getNontrivialCycles();
 	}
 	
 	@Override
-	public IDependencyGraph<M> buildDependencyGraph() throws CyclicGraphException {
+	public IDependencyGraph<M> createDependencyGraph() throws CyclicGraphException {
 		if (priorityMap.isEmpty()) {
 			return new DependencyGraph<>(graph);
 		} else {

@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
-import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -28,7 +28,7 @@ public class GraphCycleTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyGraphBuilder<Module> dependencyBuilder;
+	private IDependencyGraphFactory<Module> dependencyBuilder;
 	private ImmutableMap<String, Module> moduleIndex;
 
 
@@ -86,7 +86,7 @@ public class GraphCycleTest {
 		);		
 
 		dependencyBuilder = new DependencyGraphBuilder<>(modules);
-		graph = dependencyBuilder.getGraph();
+		graph = dependencyBuilder.getDirectedGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 

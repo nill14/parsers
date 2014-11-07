@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
-import com.github.nill14.parsers.dependency.IDependencyGraphBuilder;
+import com.github.nill14.parsers.dependency.IDependencyGraphFactory;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphBuilder;
@@ -38,7 +38,7 @@ public class GraphWalkerTest {
 	private final ExecutorService executor = Executors.newFixedThreadPool(8);
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
-	private IDependencyGraphBuilder<Module> dependencyBuilder;
+	private IDependencyGraphFactory<Module> dependencyBuilder;
 	private IDependencyGraph<Module> walker; 
 	private ImmutableMap<String, Module> moduleIndex;
 
@@ -94,8 +94,8 @@ public class GraphWalkerTest {
 		);		
 		
 		dependencyBuilder = new DependencyGraphBuilder<>(modules);
-		walker = dependencyBuilder.buildDependencyGraph();
-		graph = dependencyBuilder.getGraph();
+		walker = dependencyBuilder.createDependencyGraph();
+		graph = dependencyBuilder.getDirectedGraph();
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 
