@@ -28,7 +28,7 @@ public class DependencyGraphFactory<K, M>  {
 	private static final Logger log = LoggerFactory.getLogger(DependencyGraphFactory.class);
 
 	
-	public static <K, M> IDependencyGraph<M> newInstance(
+	public static <K, M> IDependencyGraph<M> fromGraph(
 			DirectedGraph<M, GraphEdge<M>> graph, Map<M, Integer> priorityMap) throws UnsatisfiedDependencyException, CyclicGraphException {
 		
 		return new DependencyGraph<>(graph, newPriorityFunction(ImmutableMap.copyOf(priorityMap)));

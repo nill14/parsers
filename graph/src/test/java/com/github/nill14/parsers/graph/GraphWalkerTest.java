@@ -1,8 +1,11 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -23,8 +26,8 @@ import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
+import com.github.nill14.parsers.dependency.impl.DependencyTree;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -207,7 +210,10 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		log.info(Joiner.on("\n").join(dependencyGraph.getModuleRatings().entrySet()));
+		Collection<String> lines = new DependencyTree<>(dependencyGraph, true).getLines();
+		for (String line : lines) {
+			log.info(line);
+		}
 	}
 
 	@Test
@@ -243,5 +249,6 @@ public class GraphWalkerTest {
 		
 		assertEquals(modules.size(), count.get());
 	}
+	
 	
 }
