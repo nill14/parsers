@@ -106,21 +106,26 @@ public class DependencyTreePrinter<M> {
 		return result;
 	}
 	
+	@Override
 	public String toString() {
 		return "Dependency tree\n" + Joiner.on("\n").join(getLines());
 	}
 	
 	public void toInfoLog() {
-		log.info("Dependency tree");
-		for (String line : getLines()) {
-			log.info(line);
+		if (log.isInfoEnabled()) {
+			log.info("Dependency tree");
+			for (String line : getLines()) {
+				log.info(line);
+			}
 		}
 	}
 	
 	public void toDebugLog() {
-		log.debug("Dependency tree");
-		for (String line : getLines()) {
-			log.debug(line);
+		if (log.isDebugEnabled()) {
+			log.debug("Dependency tree");
+			for (String line : getLines()) {
+				log.debug(line);
+			}
 		}
 	}
 	
