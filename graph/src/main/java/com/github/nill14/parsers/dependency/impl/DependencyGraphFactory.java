@@ -105,7 +105,7 @@ public class DependencyGraphFactory<K, M>  {
 				}
 				for (M source : from) {
 					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
-					log.info("({}) {} -> {}", key, source, target);
+					log.trace("({}) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
 			}
@@ -115,7 +115,7 @@ public class DependencyGraphFactory<K, M>  {
 			for (M target : toOpt) {
 				for (M source : from) {
 					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
-					log.info("({} opt) {} -> {}", key, source, target);
+					log.trace("({} opt) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
 			}
