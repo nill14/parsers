@@ -26,7 +26,7 @@ import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.ModuleConsumer;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
-import com.github.nill14.parsers.dependency.impl.DependencyTree;
+import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -210,7 +210,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		Collection<String> lines = new DependencyTree<>(dependencyGraph, true).getLines();
+		Collection<String> lines = new DependencyTreePrinter<>(dependencyGraph, true).getLines();
 		for (String line : lines) {
 			log.info(line);
 		}

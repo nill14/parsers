@@ -18,9 +18,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
 
-public class DependencyTree<M> {
+public class DependencyTreePrinter<M> {
 	
-	private static final Logger log = LoggerFactory.getLogger(DependencyTree.class);
+	private static final Logger log = LoggerFactory.getLogger(DependencyTreePrinter.class);
 
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	private final Map<M, Integer> moduleRatings;
@@ -28,13 +28,13 @@ public class DependencyTree<M> {
 	private final SetMultimap<M, M> transitiveDependencies = HashMultimap.create();
 	private final List<M> topologicalOrder;
 
-	public DependencyTree(IDependencyGraph<M> dependencyGraph) {
+	public DependencyTreePrinter(IDependencyGraph<M> dependencyGraph) {
 		//by default, do not filter indirect dependencies
 		//filtering produces little bit shorter list but may be confusing
 		this(dependencyGraph, false);
 	}
 	
-	public DependencyTree(IDependencyGraph<M> dependencyGraph, boolean filterTransitive) {
+	public DependencyTreePrinter(IDependencyGraph<M> dependencyGraph, boolean filterTransitive) {
 		this.graph = dependencyGraph.getGraph();
 		moduleRatings = dependencyGraph.getModuleRatings();
 		

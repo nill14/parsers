@@ -10,13 +10,13 @@ import org.junit.Test;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
-import com.github.nill14.parsers.dependency.impl.DependencyTree;
+import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-public class DependencyTreeTest {
+public class DependencyTreePrinterTest {
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
@@ -98,11 +98,11 @@ public class DependencyTreeTest {
 	
 	@Test
 	public void testLog() {
-		System.out.println(new DependencyTree<>(dependencyGraph, true));
+		System.out.println(new DependencyTreePrinter<>(dependencyGraph, true));
 	}
 
 	@Test
 	public void testLog2() {
-		System.out.println(new DependencyTree<>(dependencyGraph, false));
+		System.out.println(new DependencyTreePrinter<>(dependencyGraph, false));
 	}	
 }

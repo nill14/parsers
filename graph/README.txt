@@ -1,7 +1,7 @@
 Graph 
 
 Implementation of directed acyclic graph along with some graph algorithms 
-and implementation of dependency management framework.
+and implementation of dependency execution framework.
 
 
 Typical usage scenario:
@@ -42,4 +42,4 @@ ExecutorService executor = Executors.newCachedThreadPool();
 dependencyGraph.walkGraph(executor, module -> System.out.println(module));
 
 // prints out dependency tree
-System.out.println(new DependencyTree(dependencyGraph));
+System.out.println(new DependencyTreePrinter(dependencyGraph));
