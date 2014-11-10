@@ -33,15 +33,13 @@ public interface IDependencyGraph<M> {
 	
 	/**
 	 * Returns module ratings based on longest path algorithm and module priority.
-	 * The modules sorted by ratings descendingly are guaranteed 
+	 * The modules sorted by the module rating descendingly are guaranteed 
 	 * to be in topological order. 
 	 * 
 	 * @return module ratings
 	 */
 	Map<M, Integer> getModuleRatings();
 	
-	String getPrettyPrint();
-
 	/**
 	 * 
 	 * @param executor an executor to be used for executing the closure

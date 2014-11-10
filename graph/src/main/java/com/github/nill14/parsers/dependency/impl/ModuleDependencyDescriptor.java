@@ -2,11 +2,11 @@ package com.github.nill14.parsers.dependency.impl;
 
 import java.util.Set;
 
-import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.IModuleDependencyDescriptor;
 import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
 import com.google.common.collect.ImmutableSet;
 
-public final class DependencyModule<K> implements IModule<K> {
+public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDescriptor<K> {
 	
 	
 	private final ImmutableSet<K> dependencies;
@@ -15,7 +15,7 @@ public final class DependencyModule<K> implements IModule<K> {
 	private final K self;
 	private final int priority;
 
-	private DependencyModule(Builder<K> builder) {
+	private ModuleDependencyDescriptor(Builder<K> builder) {
 		dependencies = builder.dependencies.build();
 		optDependencies = builder.optDependencies.build();
 		optProviders = builder.providers.build();
@@ -96,8 +96,8 @@ public final class DependencyModule<K> implements IModule<K> {
 
 		
 		@Override
-		public IModule<K> build() {
-			return new DependencyModule<>(this);
+		public IModuleDependencyDescriptor<K> build() {
+			return new ModuleDependencyDescriptor<>(this);
 		}
 	}
 

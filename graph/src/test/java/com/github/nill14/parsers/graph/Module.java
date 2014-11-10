@@ -1,19 +1,19 @@
 package com.github.nill14.parsers.graph;
 
-import com.github.nill14.parsers.dependency.IModule;
+import com.github.nill14.parsers.dependency.IModuleDependencyDescriptor;
 import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
-import com.github.nill14.parsers.dependency.impl.DependencyModule;
+import com.github.nill14.parsers.dependency.impl.ModuleDependencyDescriptor;
 import com.google.common.base.Function;
 
 public class Module {
 	
-	private final IModule<String> collector;
+	private final IModuleDependencyDescriptor<String> collector;
 	
 	private Module(Builder builder) {
 		collector = builder.builder.build();
 	}
 
-	public IModule<String> getCollector() {
+	public IModuleDependencyDescriptor<String> getCollector() {
 		return collector;
 	}
 	
@@ -26,10 +26,10 @@ public class Module {
 		return collector.toString();
 	}
 	
-	public static final Function<Module, IModule<String>> adapterFunction = new Function<Module, IModule<String>>() {
+	public static final Function<Module, IModuleDependencyDescriptor<String>> adapterFunction = new Function<Module, IModuleDependencyDescriptor<String>>() {
 		
 		@Override
-		public IModule<String> apply(Module input) {
+		public IModuleDependencyDescriptor<String> apply(Module input) {
 			return input.getCollector();
 		}
 	};
@@ -39,7 +39,7 @@ public class Module {
 		private final IModuleDependencyBuilder<String> builder;
 		
 		public Builder(String name) {
-			builder = DependencyModule.builder(name);
+			builder = ModuleDependencyDescriptor.builder(name);
 		}
 		
 		@Override
@@ -67,7 +67,7 @@ public class Module {
 		}
 		
 		@Override
-		public IModule<String> build() {
+		public IModuleDependencyDescriptor<String> build() {
 			return builder.build();
 		}
 
