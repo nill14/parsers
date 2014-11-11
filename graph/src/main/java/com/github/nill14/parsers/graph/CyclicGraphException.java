@@ -25,6 +25,11 @@ public class CyclicGraphException extends Exception {
 		return (DirectedGraph<V, E>) graph;
 	}
 	
+	/**
+	 * Calculates all non-trivial cycles in the graph. 
+	 * @param <V> The vertices of the graph
+	 * @return the collection of cycles
+	 */
 	public <V> Collection<Deque<V>> getGraphCycles() {
 		DirectedGraph<V, GraphEdge<V>> graph = getGraph();
 		return new GraphCycleDetector<>(graph).getNontrivialCycles();

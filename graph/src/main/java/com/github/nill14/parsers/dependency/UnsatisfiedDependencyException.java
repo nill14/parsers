@@ -9,7 +9,7 @@ public class UnsatisfiedDependencyException extends Exception {
 	private final Object dependency;
 
 	public <M, K> UnsatisfiedDependencyException(M module, K dependency) {
-		super(String.format("%s misses required dependency %s", module, dependency));
+		super(String.format("%s is missing the required dependency %s", module, dependency));
 		this.module = module;
 		this.dependency = dependency;
 	}

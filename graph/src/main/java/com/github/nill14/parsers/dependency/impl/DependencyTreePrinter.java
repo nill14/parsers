@@ -111,6 +111,19 @@ public class DependencyTreePrinter<M> {
 		return "Dependency tree\n" + Joiner.on("\n").join(getLines());
 	}
 	
+	/**
+	 * Outputs the dependency tree to System.out
+	 */
+	public void toConsole() {
+		log.info("Dependency tree");
+		for (String line : getLines()) {
+			System.out.println(line);
+		}
+	}
+	
+	/**
+	 * Outputs the dependency tree to {@link Logger#info(String)}
+	 */
 	public void toInfoLog() {
 		if (log.isInfoEnabled()) {
 			log.info("Dependency tree");
@@ -120,6 +133,9 @@ public class DependencyTreePrinter<M> {
 		}
 	}
 	
+	/**
+	 * Outputs the dependency tree to {@link Logger#debug(String)}
+	 */
 	public void toDebugLog() {
 		if (log.isDebugEnabled()) {
 			log.debug("Dependency tree");
