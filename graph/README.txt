@@ -33,21 +33,20 @@ class ModuleC extends AbstractModule {
 }
 
 public class Test {
-	public static void main(String[] args) throws UnsatisfiedDependencyException, 
-			CyclicGraphException, ExecutionException {
-		
-		// create dependency graph
-		Set<AbstractModule> modules = 
-			Sets.newHashSet(new ModuleA(), new ModuleB(), new ModuleC());
-		
-		IDependencyGraph<AbstractModule> dependencyGraph = DependencyGraphFactory
-			.newInstance(modules, m -> m.getDependencyDescriptor());
-		
-		ExecutorService executor = Executors.newCachedThreadPool();
-		// execute first ModuleA and ModuleC in parallel and when completed, executes ModuleB
-		dependencyGraph.walkGraph(executor, module -> System.out.println(module));
-		
-		// prints out the dependency tree to System.out
-		new DependencyTreePrinter<>(dependencyGraph).toConsole();
-	}
+public static void main(String[] args) throws UnsatisfiedDependencyException, 
+	CyclicGraphException, ExecutionException {
+	
+	// create dependency graph
+	Set<AbstractModule> modules = Sets.newHashSet(new ModuleA(), new ModuleB(), new ModuleC());
+	
+	IDependencyGraph<AbstractModule> dependencyGraph = 
+		DependencyGraphFactory.newInstance(modules, m -> m.getDependencyDescriptor());
+	
+	ExecutorService executor = Executors.newCachedThreadPool();
+	// execute first ModuleA and ModuleC in parallel and when completed, executes ModuleB
+	dependencyGraph.walkGraph(executor, module -> System.out.println(module));
+	
+	// prints out the dependency tree to System.out
+	new DependencyTreePrinter<>(dependencyGraph).toConsole();
+}
 }
