@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
@@ -36,7 +35,7 @@ public class DependencyTreePrinter<M> {
 	
 	public DependencyTreePrinter(IDependencyGraph<M> dependencyGraph, boolean filterTransitive) {
 		this.graph = dependencyGraph.getGraph();
-		moduleRatings = dependencyGraph.getModuleRatings();
+		moduleRatings = dependencyGraph.getModuleRankings();
 		
 		topologicalOrder = dependencyGraph.getTopologicalOrder();
 		
@@ -104,11 +103,6 @@ public class DependencyTreePrinter<M> {
 			visitRootNode(result, rootNode);
 		}
 		return result;
-	}
-	
-	@Override
-	public String toString() {
-		return "Dependency tree\n" + Joiner.on("\n").join(getLines());
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Set;
 
@@ -29,14 +29,14 @@ public class DependencyTreePrinterTest {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.provides("A")
-				.dependsOn("M")
+				.uses("M")
 				.buildModule(),
 			Module.builder("B")
-				.dependsOn("A")
+				.uses("A")
 				.buildModule(),
 			Module.builder("C")
-				.dependsOn("A")
-				.dependsOn("B")
+				.uses("A")
+				.uses("B")
 				.buildModule(),	
 				
 			//not connected	
@@ -46,17 +46,17 @@ public class DependencyTreePrinterTest {
 			Module.builder("E")
 				.buildModule(),	
 			Module.builder("F")
-				.dependsOn("E")
+				.uses("E")
 				.buildModule(),
 			Module.builder("G")
-				.dependsOn("F")
+				.uses("F")
 				.buildModule(),
 				
 			Module.builder("H")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("I")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("J")
 				.provides("A")
@@ -65,7 +65,7 @@ public class DependencyTreePrinterTest {
 			Module.builder("K")
 				.buildModule(),
 			Module.builder("L")
-				.dependsOn("K")
+				.uses("K")
 				.buildModule(),
 				
 			Module.builder("M")

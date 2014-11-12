@@ -1,28 +1,28 @@
 package com.github.nill14.parsers.dependency;
 
 
-public interface IModuleDependencyBuilder<K> {
+public interface IDependencyDescriptorBuilder<K> {
 
 	/**
 	 * consumes, dependsOn 
 	 * @param dependency a service provider 
 	 * @return self
 	 */
-	IModuleDependencyBuilder<K> dependsOn(K dependency);
+	IDependencyDescriptorBuilder<K> uses(K dependency);
 
 	/**
 	 * consumes, dependsOn (optionally)
 	 * @param dependency a service provider 
 	 * @return self
 	 */
-	IModuleDependencyBuilder<K> dependsOnOptionally(K dependency);
+	IDependencyDescriptorBuilder<K> usesOptionally(K dependency);
 
 	/**
 	 * provides or isPrerequisiteOf
 	 * @param service a service provider 
 	 * @return self
 	 */
-	IModuleDependencyBuilder<K> provides(K service);
+	IDependencyDescriptorBuilder<K> provides(K service);
 
 	/**
 	 * Module priority lifts up the module in execution order
@@ -35,8 +35,8 @@ public interface IModuleDependencyBuilder<K> {
 	 * @param priority the module priority (0..100000)
 	 * @return self
 	 */
-	IModuleDependencyBuilder<K> modulePriority(int priority);
+	IDependencyDescriptorBuilder<K> executionPriority(int priority);
 	
-	IModuleDependencyDescriptor<K> build();
+	IDependencyDescriptor<K> build();
 
 }

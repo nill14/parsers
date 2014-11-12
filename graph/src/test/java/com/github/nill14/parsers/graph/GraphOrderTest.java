@@ -38,14 +38,14 @@ public class GraphOrderTest {
 	public void init() throws UnsatisfiedDependencyException, CyclicGraphException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
-				.dependsOnOptionally("M")
+				.usesOptionally("M")
 				.buildModule(),
 			Module.builder("B")
-				.dependsOn("A")
+				.uses("A")
 				.buildModule(),
 			Module.builder("C")
-				.dependsOn("A")
-				.dependsOn("B")
+				.uses("A")
+				.uses("B")
 				.buildModule(),	
 				
 			//not connected	
@@ -55,17 +55,17 @@ public class GraphOrderTest {
 			Module.builder("E")
 				.buildModule(),	
 			Module.builder("F")
-				.dependsOn("E")
+				.uses("E")
 				.buildModule(),
 			Module.builder("G")
-				.dependsOn("F")
+				.uses("F")
 				.buildModule(),
 				
 			Module.builder("H")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("I")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("J")
 				.provides("A")
@@ -74,7 +74,7 @@ public class GraphOrderTest {
 			Module.builder("K")
 				.buildModule(),
 			Module.builder("L")
-				.dependsOn("K")
+				.uses("K")
 				.buildModule(),
 				
 			Module.builder("M")

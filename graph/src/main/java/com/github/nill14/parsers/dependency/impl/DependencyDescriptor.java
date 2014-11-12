@@ -2,11 +2,11 @@ package com.github.nill14.parsers.dependency.impl;
 
 import java.util.Set;
 
-import com.github.nill14.parsers.dependency.IModuleDependencyDescriptor;
-import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
+import com.github.nill14.parsers.dependency.IDependencyDescriptor;
+import com.github.nill14.parsers.dependency.IDependencyDescriptorBuilder;
 import com.google.common.collect.ImmutableSet;
 
-public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDescriptor<K> {
+public final class DependencyDescriptor<K> implements IDependencyDescriptor<K> {
 	
 	
 	private final ImmutableSet<K> dependencies;
@@ -15,7 +15,7 @@ public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDes
 	private final K self;
 	private final int priority;
 
-	private ModuleDependencyDescriptor(Builder<K> builder) {
+	private DependencyDescriptor(Builder<K> builder) {
 		dependencies = builder.dependencies.build();
 		optDependencies = builder.optDependencies.build();
 		optProviders = builder.providers.build();
@@ -43,11 +43,11 @@ public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDes
 	}
 
 	@Override
-	public int getModulePriority() {
+	public int getExecutionPriority() {
 		return priority;
 	}
 	
-	public static <K> IModuleDependencyBuilder<K> builder(K self) {
+	public static <K> IDependencyDescriptorBuilder<K> builder(K self) {
 		return new Builder<>(self);
 	}
 	
@@ -57,7 +57,7 @@ public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDes
 		return self.toString();
 	}
 	
-	public static class Builder<K> implements IModuleDependencyBuilder<K> {
+	public static class Builder<K> implements IDependencyDescriptorBuilder<K> {
 		
 		private final ImmutableSet.Builder<K> dependencies = ImmutableSet.builder();
 		private final ImmutableSet.Builder<K> optDependencies = ImmutableSet.builder();
@@ -71,33 +71,33 @@ public final class ModuleDependencyDescriptor<K> implements IModuleDependencyDes
 		}
 		
 		@Override
-		public IModuleDependencyBuilder<K> dependsOn(K dependency) {
+		public IDependencyDescriptorBuilder<K> uses(K dependency) {
 			dependencies.add(dependency);
 			return this;
 		}
 		
 		@Override
-		public IModuleDependencyBuilder<K> dependsOnOptionally(K dependency) {
+		public IDependencyDescriptorBuilder<K> usesOptionally(K dependency) {
 			optDependencies.add(dependency);
 			return this;
 		}
 		
 		@Override
-		public IModuleDependencyBuilder<K> provides(K provider) {
+		public IDependencyDescriptorBuilder<K> provides(K provider) {
 			providers.add(provider);
 			return this;
 		}
 		
 		@Override
-		public IModuleDependencyBuilder<K> modulePriority(int priority) {
+		public IDependencyDescriptorBuilder<K> executionPriority(int priority) {
 			this.priority = priority;
 			return this;
 		}
 
 		
 		@Override
-		public IModuleDependencyDescriptor<K> build() {
-			return new ModuleDependencyDescriptor<>(this);
+		public IDependencyDescriptor<K> build() {
+			return new DependencyDescriptor<>(this);
 		}
 	}
 

@@ -1,6 +1,6 @@
 package com.github.nill14.parsers.dependency;
 
-public interface ModuleConsumer<T> {
+public interface IConsumer<T> {
 
 	/**
 	 * Perform an arbitrary code with the module.

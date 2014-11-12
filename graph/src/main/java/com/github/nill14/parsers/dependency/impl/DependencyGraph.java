@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.ModuleConsumer;
+import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -57,13 +57,13 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	}
 	
 	@Override
-	public Map<M, Integer> getModuleRatings() {
+	public Map<M, Integer> getModuleRankings() {
 		return Maps.newLinkedHashMap(moduleRatings);
 	}
 	
 	@Override
 	public void walkGraph(final ExecutorService executor,
-			final ModuleConsumer<M> moduleConsumer)
+			final IConsumer<M> moduleConsumer)
 			throws ExecutionException {
 		
 		final GraphWalker<M> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
@@ -92,7 +92,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	}
 	
 	@Override
-	public void iterateTopoOrder(ModuleConsumer<M> moduleConsumer) throws ExecutionException {
+	public void iterateTopoOrder(IConsumer<M> moduleConsumer) throws ExecutionException {
 		GraphWalker<M> graphWalker = new GraphWalker<>(graph, topologicalOrdering);
 		
 		for (M module : graphWalker) {

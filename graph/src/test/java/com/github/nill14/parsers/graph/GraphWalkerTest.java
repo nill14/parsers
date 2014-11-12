@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.ModuleConsumer;
+import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
@@ -50,14 +50,14 @@ public class GraphWalkerTest {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.provides("A")
-				.dependsOn("M")
+				.uses("M")
 				.buildModule(),
 			Module.builder("B")
-				.dependsOn("A")
+				.uses("A")
 				.buildModule(),
 			Module.builder("C")
-				.dependsOn("A")
-				.dependsOn("B")
+				.uses("A")
+				.uses("B")
 				.buildModule(),	
 				
 			//not connected	
@@ -67,17 +67,17 @@ public class GraphWalkerTest {
 			Module.builder("E")
 				.buildModule(),	
 			Module.builder("F")
-				.dependsOn("E")
+				.uses("E")
 				.buildModule(),
 			Module.builder("G")
-				.dependsOn("F")
+				.uses("F")
 				.buildModule(),
 				
 			Module.builder("H")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("I")
-				.dependsOn("C")
+				.uses("C")
 				.buildModule(),
 			Module.builder("J")
 				.provides("A")
@@ -86,7 +86,7 @@ public class GraphWalkerTest {
 			Module.builder("K")
 				.buildModule(),
 			Module.builder("L")
-				.dependsOn("K")
+				.uses("K")
 				.buildModule(),
 				
 			Module.builder("M")
@@ -135,7 +135,7 @@ public class GraphWalkerTest {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
+		dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
@@ -160,7 +160,7 @@ public class GraphWalkerTest {
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
-		dependencyGraph.iterateTopoOrder(new ModuleConsumer<Module>() {
+		dependencyGraph.iterateTopoOrder(new IConsumer<Module>() {
 			
 			@Override
 			public void process(Module module) throws Exception {
@@ -184,7 +184,7 @@ public class GraphWalkerTest {
 		thrown.expectMessage("test checked exception");
 		
 		try {
-			dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
+			dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
 				
 				@Override
 				public void process(Module module) throws Exception {
@@ -224,7 +224,7 @@ public class GraphWalkerTest {
 		thrown.expectMessage("test checked exception");
 		
 		try {
-			dependencyGraph.walkGraph(executor, new ModuleConsumer<Module>() {
+			dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
 				
 				@Override
 				public void process(Module module) throws Exception {

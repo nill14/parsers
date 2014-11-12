@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * K is an arbitrary type but provides correct {@link Object#hashCode()} and {@link Object#equals(Object)}
  */
-public interface IModuleDependencyDescriptor<K> {
+public interface IDependencyDescriptor<K> {
 
 	
 	/**
@@ -41,7 +41,7 @@ public interface IModuleDependencyDescriptor<K> {
 	 * 
 	 * @return module priority
 	 */
-	int getModulePriority();
+	int getExecutionPriority();
 
 }
 

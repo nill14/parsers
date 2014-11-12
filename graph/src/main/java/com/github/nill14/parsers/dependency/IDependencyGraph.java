@@ -36,9 +36,9 @@ public interface IDependencyGraph<M> {
 	 * The modules sorted by the module rating descendingly are guaranteed 
 	 * to be in topological order. 
 	 * 
-	 * @return module ratings
+	 * @return module rankings
 	 */
-	Map<M, Integer> getModuleRatings();
+	Map<M, Integer> getModuleRankings();
 	
 	/**
 	 * 
@@ -46,13 +46,13 @@ public interface IDependencyGraph<M> {
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void walkGraph(ExecutorService executor, ModuleConsumer<M> moduleConsumer) throws ExecutionException;
+	void walkGraph(ExecutorService executor, IConsumer<M> moduleConsumer) throws ExecutionException;
 
 	/**
-	 * Synchronous version of {@link #walkGraph(ExecutorService, ModuleConsumer)}
+	 * Synchronous version of {@link #walkGraph(ExecutorService, IConsumer)}
 	 * 
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception
 	 */
-	void iterateTopoOrder(ModuleConsumer<M> moduleConsumer) throws ExecutionException;
+	void iterateTopoOrder(IConsumer<M> moduleConsumer) throws ExecutionException;
 }

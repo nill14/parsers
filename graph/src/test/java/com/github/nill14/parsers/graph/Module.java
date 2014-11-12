@@ -1,19 +1,19 @@
 package com.github.nill14.parsers.graph;
 
-import com.github.nill14.parsers.dependency.IModuleDependencyDescriptor;
-import com.github.nill14.parsers.dependency.IModuleDependencyBuilder;
-import com.github.nill14.parsers.dependency.impl.ModuleDependencyDescriptor;
+import com.github.nill14.parsers.dependency.IDependencyDescriptor;
+import com.github.nill14.parsers.dependency.IDependencyDescriptorBuilder;
+import com.github.nill14.parsers.dependency.impl.DependencyDescriptor;
 import com.google.common.base.Function;
 
 public class Module {
 	
-	private final IModuleDependencyDescriptor<String> collector;
+	private final IDependencyDescriptor<String> collector;
 	
 	private Module(Builder builder) {
 		collector = builder.builder.build();
 	}
 
-	public IModuleDependencyDescriptor<String> getCollector() {
+	public IDependencyDescriptor<String> getCollector() {
 		return collector;
 	}
 	
@@ -26,31 +26,31 @@ public class Module {
 		return collector.toString();
 	}
 	
-	public static final Function<Module, IModuleDependencyDescriptor<String>> adapterFunction = new Function<Module, IModuleDependencyDescriptor<String>>() {
+	public static final Function<Module, IDependencyDescriptor<String>> adapterFunction = new Function<Module, IDependencyDescriptor<String>>() {
 		
 		@Override
-		public IModuleDependencyDescriptor<String> apply(Module input) {
+		public IDependencyDescriptor<String> apply(Module input) {
 			return input.getCollector();
 		}
 	};
 	
-	public static class Builder implements IModuleDependencyBuilder<String> {
+	public static class Builder implements IDependencyDescriptorBuilder<String> {
 		
-		private final IModuleDependencyBuilder<String> builder;
+		private final IDependencyDescriptorBuilder<String> builder;
 		
 		public Builder(String name) {
-			builder = ModuleDependencyDescriptor.builder(name);
+			builder = DependencyDescriptor.builder(name);
 		}
 		
 		@Override
-		public Builder dependsOn(String fqn) {
-			builder.dependsOn(fqn);
+		public Builder uses(String fqn) {
+			builder.uses(fqn);
 			return this;
 		}
 
 		@Override
-		public Builder dependsOnOptionally(String fqn) {
-			builder.dependsOnOptionally(fqn);
+		public Builder usesOptionally(String fqn) {
+			builder.usesOptionally(fqn);
 			return this;
 		}
 		
@@ -61,13 +61,13 @@ public class Module {
 		}		
 
 		@Override
-		public IModuleDependencyBuilder<String> modulePriority(int priority) {
-			builder.modulePriority(priority);
+		public IDependencyDescriptorBuilder<String> executionPriority(int priority) {
+			builder.executionPriority(priority);
 			return this;
 		}
 		
 		@Override
-		public IModuleDependencyDescriptor<String> build() {
+		public IDependencyDescriptor<String> build() {
 			return builder.build();
 		}
 

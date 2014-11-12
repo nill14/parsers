@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.github.nill14.parsers.dependency.IModuleDependencyDescriptor;
+import com.github.nill14.parsers.dependency.IDependencyDescriptor;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -53,7 +53,7 @@ public class DependencyGraphFactory<K, M>  {
 	 * @throws UnsatisfiedDependencyException when a mandatory dependency is missing
 	 * @throws CyclicGraphException when graph is not acyclic
 	 */
-	public static <K, M extends IModuleDependencyDescriptor<K>> IDependencyGraph<M> newInstance(
+	public static <K, M extends IDependencyDescriptor<K>> IDependencyGraph<M> newInstance(
 			Set<M> modules) throws UnsatisfiedDependencyException, CyclicGraphException {
 		
 		return newInstance(modules, Functions.<M>identity());
@@ -64,16 +64,16 @@ public class DependencyGraphFactory<K, M>  {
 	 * @param <K> The keys used to establish connection between modules.
 	 * @param <M> The modules
 	 * @param modules The dependency units
-	 * @param adapterFunction The function module -&gt; {@link IModuleDependencyDescriptor}
+	 * @param adapterFunction The function module -&gt; {@link IDependencyDescriptor}
 	 * @return A new IDependencyGraph
 	 * @throws UnsatisfiedDependencyException when a mandatory dependency is missing
 	 * @throws CyclicGraphException when graph is not acyclic
 	 */
 	public static <K, M> IDependencyGraph<M> newInstance(
-			Set<M> modules, Function<M, ? extends IModuleDependencyDescriptor<K>> adapterFunction) 
+			Set<M> modules, Function<M, ? extends IDependencyDescriptor<K>> adapterFunction) 
 					throws UnsatisfiedDependencyException, CyclicGraphException {
 		
-		Function<M, IModuleDependencyDescriptor<K>> f = newCachedAdapterFunction(modules, adapterFunction);
+		Function<M, IDependencyDescriptor<K>> f = newCachedAdapterFunction(modules, adapterFunction);
 		Function<M, Integer> priorityFunction = newPriorityFunction(modules, f);
 		DirectedGraph<M, GraphEdge<M>> graph = newGraph(modules, f);
 		
@@ -81,20 +81,20 @@ public class DependencyGraphFactory<K, M>  {
 	}
 
 	
-	private static <K, M> Function<M, IModuleDependencyDescriptor<K>> newCachedAdapterFunction(Set<M> modules, Function<M, ? extends IModuleDependencyDescriptor<K>> adapterFunction) {
-		ImmutableMap.Builder<M, IModuleDependencyDescriptor<K>> builder = ImmutableMap.builder();
+	private static <K, M> Function<M, IDependencyDescriptor<K>> newCachedAdapterFunction(Set<M> modules, Function<M, ? extends IDependencyDescriptor<K>> adapterFunction) {
+		ImmutableMap.Builder<M, IDependencyDescriptor<K>> builder = ImmutableMap.builder();
 		for (M module : modules) {
-			IModuleDependencyDescriptor<K> descriptor = adapterFunction.apply(module);
+			IDependencyDescriptor<K> descriptor = adapterFunction.apply(module);
 			builder.put(module, descriptor);
 		}
 		return Functions.forMap(builder.build());
 	}
 	
-	private static <K, M> Function<M, Integer> newPriorityFunction(Set<M> modules, Function<M, ? extends IModuleDependencyDescriptor<K>> adapterFunction) throws UnsatisfiedDependencyException {
+	private static <K, M> Function<M, Integer> newPriorityFunction(Set<M> modules, Function<M, ? extends IDependencyDescriptor<K>> adapterFunction) throws UnsatisfiedDependencyException {
 		ImmutableMap.Builder<M, Integer> priorityMapBuilder = ImmutableMap.builder();
 		for (M module : modules) {
-			IModuleDependencyDescriptor<K> node = adapterFunction.apply(module);
-			priorityMapBuilder.put(module, node.getModulePriority());
+			IDependencyDescriptor<K> node = adapterFunction.apply(module);
+			priorityMapBuilder.put(module, node.getExecutionPriority());
 		}
 		return Functions.forMap(priorityMapBuilder.build(), 0);
 	}
@@ -104,12 +104,12 @@ public class DependencyGraphFactory<K, M>  {
 	 * @param <K> The keys used to establish connection between modules.
 	 * @param <M> The modules
 	 * @param modules The dependency units
-	 * @param adapterFunction The function module -&gt; {@link IModuleDependencyDescriptor}
+	 * @param adapterFunction The function module -&gt; {@link IDependencyDescriptor}
 	 * @return A new IDependencyGraph
 	 * @throws UnsatisfiedDependencyException when a mandatory dependency is missing
 	 */
 	public static <K, M> DirectedGraph<M, GraphEdge<M>> newGraph(
-			Set<M> modules, Function<M, ? extends IModuleDependencyDescriptor<K>> adapterFunction) 
+			Set<M> modules, Function<M, ? extends IDependencyDescriptor<K>> adapterFunction) 
 					throws UnsatisfiedDependencyException {
 		
 		ImmutableSetMultimap.Builder<K, M> consumersBuilder = ImmutableSetMultimap.builder();
@@ -117,7 +117,7 @@ public class DependencyGraphFactory<K, M>  {
 		ImmutableSetMultimap.Builder<K, M> producersBuilder = ImmutableSetMultimap.builder();
 		
 		for (M module : modules) {
-			IModuleDependencyDescriptor<K> node = adapterFunction.apply(module);
+			IDependencyDescriptor<K> node = adapterFunction.apply(module);
 			for (K consumer : node.getRequiredDependencies()) {
 				consumersBuilder.put(consumer, module);
 			}
