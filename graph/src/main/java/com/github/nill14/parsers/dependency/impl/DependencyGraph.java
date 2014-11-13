@@ -70,7 +70,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		
 		try {
 			for (final M module : graphWalker) {
-				graphWalker.checkFailure();
 				executor.execute(new Runnable() {
 					@Override
 					public void run() {
