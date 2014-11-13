@@ -250,5 +250,14 @@ public class GraphWalkerTest {
 		assertEquals(modules.size(), count.get());
 	}
 	
-	
+	@Test
+	public void testDependencies() {
+		Module moduleM = findModule("M");
+		Module moduleA = findModule("A");
+		Module moduleB = findModule("B");
+		
+		assertTrue(dependencyGraph.getDirectDependencies(moduleA).contains(moduleM));
+		assertTrue(!dependencyGraph.getDirectDependencies(moduleB).contains(moduleM));
+		assertTrue(dependencyGraph.getAllDependencies(moduleB).contains(moduleM));
+	}
 }

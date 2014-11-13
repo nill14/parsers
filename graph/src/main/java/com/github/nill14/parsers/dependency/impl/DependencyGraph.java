@@ -16,8 +16,11 @@ import com.github.nill14.parsers.graph.GraphEdge;
 import com.github.nill14.parsers.graph.utils.GraphWalker;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 
 class DependencyGraph<M> implements IDependencyGraph<M> {
 	
@@ -25,12 +28,22 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	private final LinkedHashMap<M, Integer> moduleRatings;
 	private final List<M> topologicalOrdering;
+	private final ImmutableSetMultimap<M,M> dependencies;
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
 		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
 		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
+		
+		SetMultimap<M, M> dependencies = HashMultimap.create();
+		for (M node : topologicalOrdering) {
+			Set<M> directDependencies = graph.predecessors(node);
+			for (M dependency : directDependencies) {
+				dependencies.putAll(node, dependencies.get(dependency));
+			}
+		}
+		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
@@ -38,6 +51,16 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		this.modules = graph.nodes();
 		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
 		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
+		
+		SetMultimap<M, M> dependencies = HashMultimap.create();
+		for (M node : topologicalOrdering) {
+			Set<M> directDependencies = graph.predecessors(node);
+			for (M dependency : directDependencies) {
+				dependencies.put(node, dependency);
+				dependencies.putAll(node, dependencies.get(dependency));
+			}
+		}
+		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 
 	
@@ -49,6 +72,16 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	@Override
 	public Set<M> getModules() {
 		return modules;
+	}
+	
+	@Override
+	public Set<M> getDirectDependencies(M module) {
+		return graph.predecessors(module);
+	}
+	
+	@Override
+	public Set<M> getAllDependencies(M module) {
+		return dependencies.get(module);
 	}
 	
 	@Override

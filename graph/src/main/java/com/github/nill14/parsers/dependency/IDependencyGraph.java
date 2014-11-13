@@ -27,6 +27,20 @@ public interface IDependencyGraph<M> {
 	
 	/**
 	 * 
+	 * @param module The module having dependencies
+	 * @return A set of direct dependencies of M, not considering transitive.
+	 */
+	Set<M> getDirectDependencies(M module);
+	
+	/**
+	 * 
+	 * @param module The module having dependencies
+	 * @return A set of all dependencies of M, including transitive.
+	 */
+	Set<M> getAllDependencies(M module);
+	
+	/**
+	 * 
 	 * @return a topologically sorted list of modules
 	 */
 	List<M> getTopologicalOrder();

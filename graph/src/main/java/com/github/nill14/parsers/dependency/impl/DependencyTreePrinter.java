@@ -1,5 +1,6 @@
 package com.github.nill14.parsers.dependency.impl;
 
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -109,9 +110,16 @@ public class DependencyTreePrinter<M> {
 	 * Outputs the dependency tree to System.out
 	 */
 	public void toConsole() {
+		toPrintStream(System.out);
+	}
+	
+	/**
+	 * Outputs the dependency tree to a PrintStream
+	 */
+	public void toPrintStream(PrintStream p) {
 		log.info("Dependency tree");
 		for (String line : getLines()) {
-			System.out.println(line);
+			p.println(line);
 		}
 	}
 	
