@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -20,8 +19,6 @@ import com.google.common.collect.SetMultimap;
 
 public class DependencyTreePrinter<M> {
 	
-	private static final Logger log = LoggerFactory.getLogger(DependencyTreePrinter.class);
-
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	private final Map<M, Integer> moduleRatings;
 	private final SetMultimap<M, M> directDependencies = HashMultimap.create();
@@ -117,7 +114,7 @@ public class DependencyTreePrinter<M> {
 	 * Outputs the dependency tree to a PrintStream
 	 */
 	public void toPrintStream(PrintStream p) {
-		log.info("Dependency tree");
+		p.println("Dependency tree");
 		for (String line : getLines()) {
 			p.println(line);
 		}
@@ -126,7 +123,7 @@ public class DependencyTreePrinter<M> {
 	/**
 	 * Outputs the dependency tree to {@link Logger#info(String)}
 	 */
-	public void toInfoLog() {
+	public void toInfoLog(Logger log) {
 		if (log.isInfoEnabled()) {
 			log.info("Dependency tree");
 			for (String line : getLines()) {
@@ -138,7 +135,7 @@ public class DependencyTreePrinter<M> {
 	/**
 	 * Outputs the dependency tree to {@link Logger#debug(String)}
 	 */
-	public void toDebugLog() {
+	public void toDebugLog(Logger log) {
 		if (log.isDebugEnabled()) {
 			log.debug("Dependency tree");
 			for (String line : getLines()) {
