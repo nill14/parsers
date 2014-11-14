@@ -20,6 +20,7 @@ import com.google.common.collect.Sets;
  *
  * Thread safety:  {@link #releaseNext()}, {@link #hasNext()} is supposed to be called only from a single scheduling thread.
  */
+@Deprecated
 public class GraphWalkerLegacy<V> implements Iterable<V> {
 
 	private final DirectedGraph<V, ?> graph;

@@ -144,9 +144,9 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalkerOnly() throws InterruptedException, ExecutionException {
-		GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
+		final GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
 		try {
-			for (Module module : graphWalker) {
+			for (final Module module : graphWalker) {
 				executor.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -168,7 +168,7 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalker1Only() throws InterruptedException, ExecutionException {
-		GraphWalker<Module> graphWalker = new GraphWalker1<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
+		final GraphWalker<Module> graphWalker = new GraphWalker1<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
 		for (int i = 0; i < graphWalker.size(); i++) {
 			final Module module = graphWalker.releaseNext();
 			executor.execute(new Runnable() {
