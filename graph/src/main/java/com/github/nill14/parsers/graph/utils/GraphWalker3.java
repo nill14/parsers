@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,43 +15,38 @@ import com.github.nill14.parsers.graph.GraphWalker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class GraphWalker1<V> implements GraphWalker<V> {
+public class GraphWalker3<V> implements GraphWalker<V> {
 
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
-	private int lastIndex = 0;
+	private AtomicInteger lastIndex = new AtomicInteger(0);
 	private ExecutionException exception;
 	
+	private final Lock lock2 = new ReentrantLock();
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
 	
 	private final Lock lock = new ReentrantLock();
 	private final Condition lockCondition = lock.newCondition();
 
-	public <E extends GraphEdge<V>> GraphWalker1(DirectedGraph<V, E> graph, List<V> topoList) {
+	public <E extends GraphEdge<V>> GraphWalker3(DirectedGraph<V, E> graph, List<V> topoList) {
 		this.graph = graph;
 		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
 	}
 	
 	@Override
 	public void onComplete(V vertex) {
-		try {
-			lock.lock();
-			
-			//reset index
-			lastIndex = 0;
-			
-			//remove from runnning
-			if (!running.remove(vertex)) {
-				throw new IllegalArgumentException("Not running, cannot complete: "+vertex);
+		finished(vertex);
+		
+		//reset index
+		lastIndex.set(0);
+		
+		if (lock.tryLock()) {
+			try {
+				lockCondition.signal();
+			} finally {
+				lock.unlock();
 			}
-			
-			//add to completed
-			completed.add(vertex);
-			lockCondition.signal();
-			
-		} finally {
-			lock.unlock();
 		}
 	}
 	
@@ -81,13 +77,14 @@ public class GraphWalker1<V> implements GraphWalker<V> {
 					throw new NoSuchElementException();
 				} 
 				
-				for (; lastIndex < topoList.size(); lastIndex++) {
-					V vertex = topoList.get(lastIndex);
-					if (isReleaseable(vertex)) {
-						topoList.remove(lastIndex);
-						running.add(vertex);
+				int i = lastIndex.getAndIncrement();
+				while (i < topoList.size()) {
+					V vertex = topoList.get(i);
+					if (doStartIfPossible(vertex)) {
+						topoList.remove(i);
 						return vertex;
 					}
+					i = lastIndex.getAndIncrement();
 				}
 				
 				// none was found, start waiting
@@ -106,10 +103,10 @@ public class GraphWalker1<V> implements GraphWalker<V> {
 	@Override
 	public boolean isCompleted() {
 		try {
-			lock.lock();
-			return topoList.isEmpty() && running.isEmpty();
+			lock2.lock();
+			return completed.size() == size(); 
 		} finally {
-			lock.unlock();
+			lock2.unlock();
 		}
 	}
 	
@@ -149,10 +146,34 @@ public class GraphWalker1<V> implements GraphWalker<V> {
 			lock.unlock();
 		}
 	}
-	
-	private boolean isReleaseable(V vertex) {
+
+	private boolean doStartIfPossible(V vertex) {
 		Set<V> set = graph.predecessors(vertex);
-		return set.isEmpty() || completed.containsAll(set);
+		try {
+			lock2.lock();
+			boolean isReleaseable = set.isEmpty() || completed.containsAll(set);
+			if (isReleaseable) {
+				running.add(vertex);
+			}
+			return isReleaseable;
+		} finally {
+			lock2.unlock();
+		}
+	}
+
+	private void finished(V vertex) {
+		try {
+			lock2.lock();
+			//remove from runnning
+			if (!running.remove(vertex)) {
+				throw new IllegalArgumentException("Not running, cannot complete: "+vertex);
+			}
+			
+			//add to completed
+			completed.add(vertex);
+		} finally {
+			lock2.unlock();
+		}
 	}
 	
 }

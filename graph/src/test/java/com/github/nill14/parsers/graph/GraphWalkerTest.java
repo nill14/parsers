@@ -132,6 +132,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testWalk() throws InterruptedException, ExecutionException {
+		log.info("testWalk start");
 		final AtomicInteger count = new AtomicInteger();
 		final Queue<Module> executionOrder = new ConcurrentLinkedQueue<>();
 		
@@ -246,6 +247,27 @@ public class GraphWalkerTest {
 				throw new RuntimeException("Unexpected", e);
 			}
 		}
+		
+		assertEquals(modules.size(), count.get());
+	}
+	
+	@Test
+	public void testExhaustAndContinue() throws InterruptedException, ExecutionException {
+		final AtomicInteger count = new AtomicInteger();
+		
+		dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
+			
+			@Override
+			public void process(Module module) throws Exception {
+				log.info("Starting module {}", module);
+				Thread.sleep(1);
+				log.info("Completing module {}", module);
+				if (count.incrementAndGet() == 1) {
+					//wait until we park with lockCondition
+					Thread.sleep(200);
+				};
+			}
+		});
 		
 		assertEquals(modules.size(), count.get());
 	}
