@@ -20,7 +20,7 @@ import com.google.common.collect.Sets;
  *
  * Thread safety:  {@link #releaseNext()}, {@link #hasNext()} is supposed to be called only from a single scheduling thread.
  */
-public class GraphWalker<V> implements Iterable<V> {
+public class GraphWalkerLegacy<V> implements Iterable<V> {
 
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
@@ -33,7 +33,7 @@ public class GraphWalker<V> implements Iterable<V> {
 	private final Lock lock = new ReentrantLock();
 	private final Condition lockCondition = lock.newCondition();
 
-	public <E extends GraphEdge<V>> GraphWalker(DirectedGraph<V, E> graph, List<V> topoList) {
+	public <E extends GraphEdge<V>> GraphWalkerLegacy(DirectedGraph<V, E> graph, List<V> topoList) {
 		this.graph = graph;
 		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
 	}
@@ -166,12 +166,12 @@ public class GraphWalker<V> implements Iterable<V> {
 
 			@Override
 			public boolean hasNext() {
-				return GraphWalker.this.hasNext();
+				return GraphWalkerLegacy.this.hasNext();
 			}
 
 			@Override
 			public V next() {
-				return GraphWalker.this.releaseNext();
+				return GraphWalkerLegacy.this.releaseNext();
 			}
 			
 			@Override

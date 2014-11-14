@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.graph.GraphWalker;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
@@ -23,7 +24,7 @@ import com.google.common.collect.Maps;
  * 
  *
  */
-public class GraphWalker2<V> implements IGraphWalker<V> {
+public class GraphWalker2<V> implements GraphWalker<V> {
 
 	private final Lock lock = new ReentrantLock();
 	private ExecutionException exception;
@@ -91,7 +92,7 @@ public class GraphWalker2<V> implements IGraphWalker<V> {
 	}
 
 	@Override
-	public void onFailure(Exception e) {
+	public void onFailure(V vertex, Exception e) {
 		try {
 			lock.lock();
 			if (exception == null) {

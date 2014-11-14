@@ -11,10 +11,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.graph.GraphWalker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class GraphWalker1<V> implements IGraphWalker<V> {
+public class GraphWalker1<V> implements GraphWalker<V> {
 
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
@@ -55,7 +56,7 @@ public class GraphWalker1<V> implements IGraphWalker<V> {
 	}
 	
 	@Override
-	public void onFailure(Exception e) {
+	public void onFailure(V vertex, Exception e) {
 	     try {
           lock.lock();
           if (exception == null) {

@@ -17,10 +17,9 @@ import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
-import com.github.nill14.parsers.graph.utils.GraphWalker;
+import com.github.nill14.parsers.graph.utils.GraphWalkerLegacy;
 import com.github.nill14.parsers.graph.utils.GraphWalker1;
 import com.github.nill14.parsers.graph.utils.GraphWalker2;
-import com.github.nill14.parsers.graph.utils.IGraphWalker;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
@@ -30,7 +29,7 @@ public class PerformanceTest {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private Set<Module> modules;
 	private IDependencyGraph<Module> dependencyGraph;
-	private IGraphWalker<Module> graphWalker;
+	private GraphWalker<Module> graphWalker;
 
 	private Set<Module> buildChain(String prefix, int count) {
 		Set<Module> set = Sets.newHashSet();
@@ -116,7 +115,7 @@ public class PerformanceTest {
 						consumer.process(module);
 						graphWalker.onComplete(module);
 					} catch (Exception e) {
-						graphWalker.onFailure(e);
+						graphWalker.onFailure(module, e);
 					}
 				}
 			});
@@ -135,7 +134,7 @@ public class PerformanceTest {
 						consumer.process(module);
 						graphWalker.onComplete(module);
 					} catch (Exception e) {
-						graphWalker.onFailure(e);
+						graphWalker.onFailure(module, e);
 					}
 				}
 			});
@@ -145,7 +144,7 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalkerOnly() throws InterruptedException, ExecutionException {
-		GraphWalker<Module> graphWalker = new GraphWalker<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
+		GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
 		try {
 			for (Module module : graphWalker) {
 				executor.execute(new Runnable() {
@@ -169,7 +168,7 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalker1Only() throws InterruptedException, ExecutionException {
-		IGraphWalker<Module> graphWalker = new GraphWalker1<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
+		GraphWalker<Module> graphWalker = new GraphWalker1<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
 		for (int i = 0; i < graphWalker.size(); i++) {
 			final Module module = graphWalker.releaseNext();
 			executor.execute(new Runnable() {
@@ -179,7 +178,7 @@ public class PerformanceTest {
 						consumer.process(module);
 						graphWalker.onComplete(module);
 					} catch (Exception e) {
-						graphWalker.onFailure(e);
+						graphWalker.onFailure(module, e);
 					}
 				}
 			});

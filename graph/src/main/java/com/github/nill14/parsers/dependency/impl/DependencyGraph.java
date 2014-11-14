@@ -12,8 +12,8 @@ import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.CyclicGraphException;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
+import com.github.nill14.parsers.graph.GraphWalker;
 import com.github.nill14.parsers.graph.utils.GraphWalker1;
-import com.github.nill14.parsers.graph.utils.IGraphWalker;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
@@ -100,7 +100,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 			final IConsumer<M> moduleConsumer)
 			throws ExecutionException {
 		
-		final IGraphWalker<M> graphWalker = new GraphWalker1<>(graph, topologicalOrdering);
+		final GraphWalker<M> graphWalker = new GraphWalker1<>(graph, topologicalOrdering);
 	
 		for (int i = 0; i < graphWalker.size(); i++) {
 			final M module = graphWalker.releaseNext();
@@ -111,7 +111,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 						moduleConsumer.process(module);
 						graphWalker.onComplete(module);
 					} catch (Exception e) {
-						graphWalker.onFailure(e);
+						graphWalker.onFailure(module, e);
 					}
 				}
 			});
