@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
  * 
  *
  */
-public class GraphWalker2<V> {
+public class GraphWalker2<V> implements IGraphWalker<V> {
 
 	private final Lock lock = new ReentrantLock();
 	private ExecutionException exception;
@@ -63,7 +63,8 @@ public class GraphWalker2<V> {
 	}
 	
 	
-	public V take() throws ExecutionException {
+	@Override
+	public V releaseNext() throws ExecutionException {
 		try {
 			Vertex<V> vertex = workQueue.take();
 			if (vertex == exceptionMarker) {
@@ -76,6 +77,7 @@ public class GraphWalker2<V> {
 		}
 	}
 	
+	@Override
 	public void onComplete(V node) {
 		Vertex<V> vertex = vertices.get(node);
 		for (Vertex<V> n : vertex.successors) {
@@ -88,6 +90,7 @@ public class GraphWalker2<V> {
 		semaphore.release();
 	}
 
+	@Override
 	public void onFailure(Exception e) {
 		try {
 			lock.lock();
@@ -103,8 +106,14 @@ public class GraphWalker2<V> {
 		semaphore.release(graph.nodes().size());
 	}
 	
+	@Override
 	public boolean isCompleted() {
-		return semaphore.availablePermits() == 1;
+		return semaphore.availablePermits() > 0;
+	}
+	
+	@Override
+	public int size() {
+		return graph.nodes().size();
 	}
 	
 	private void checkFailure() throws ExecutionException {
@@ -118,6 +127,7 @@ public class GraphWalker2<V> {
 	    }
 	}
 	
+	@Override
 	public void awaitCompletion() throws ExecutionException {
 		try {
 			semaphore.acquire();
