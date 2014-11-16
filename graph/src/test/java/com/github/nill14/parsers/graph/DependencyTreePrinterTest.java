@@ -1,11 +1,13 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
@@ -17,6 +19,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class DependencyTreePrinterTest {
+	
+	private static final Logger log = LoggerFactory.getLogger(DependencyTreePrinterTest.class);
 	
 	private DirectedGraph<Module, GraphEdge<Module>> graph;
 	private Set<Module> modules;
@@ -98,11 +102,11 @@ public class DependencyTreePrinterTest {
 	
 	@Test
 	public void testLog() {
-		System.out.println(new DependencyTreePrinter<>(dependencyGraph, true));
+		new DependencyTreePrinter<>(dependencyGraph, true).toInfoLog(log);;
 	}
 
 	@Test
 	public void testLog2() {
-		System.out.println(new DependencyTreePrinter<>(dependencyGraph, false));
+		new DependencyTreePrinter<>(dependencyGraph, false).toInfoLog(log);
 	}	
 }

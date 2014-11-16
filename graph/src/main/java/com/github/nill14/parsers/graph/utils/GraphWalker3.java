@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -19,9 +20,11 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 
 	private final DirectedGraph<V, ?> graph;
 	private final List<V> topoList;
-	private AtomicInteger lastIndex = new AtomicInteger(0);
 	private ExecutionException exception;
 	
+	private AtomicInteger lastIndex = new AtomicInteger(0);
+	private final Semaphore parallelism;
+
 	private final Lock lock2 = new ReentrantLock();
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
@@ -29,9 +32,10 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	private final Lock lock = new ReentrantLock();
 	private final Condition lockCondition = lock.newCondition();
 
-	public <E extends GraphEdge<V>> GraphWalker3(DirectedGraph<V, E> graph, List<V> topoList) {
+	public <E extends GraphEdge<V>> GraphWalker3(DirectedGraph<V, E> graph, List<V> topoList, int parallelism) {
 		this.graph = graph;
 		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
+		this.parallelism = new Semaphore(parallelism);
 	}
 	
 	@Override
@@ -41,33 +45,40 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 		//reset index
 		lastIndex.set(0);
 		
-		if (lock.tryLock()) {
-			try {
-				lockCondition.signal();
-			} finally {
-				lock.unlock();
-			}
+		try {
+			lock.lock();
+			lockCondition.signalAll();
+		} finally {
+			lock.unlock();
 		}
+		parallelism.release();
 	}
 	
 	@Override
 	public void onFailure(V vertex, Exception e) {
-	     try {
-          lock.lock();
-          if (exception == null) {
-        	  exception = new ExecutionException(e);
-          } else {
-        	  exception.addSuppressed(e);
-          }
-          lockCondition.signal();
-          
-      } finally {
-          lock.unlock();
-      }
+		try {
+			lock.lock();
+			if (exception == null) {
+				exception = new ExecutionException(e);
+			} else {
+				exception.addSuppressed(e);
+			}
+			lockCondition.signalAll();
+
+		} finally {
+			lock.unlock();
+		}
+	    parallelism.release();
 	}
 	
 	@Override
 	public V releaseNext() throws ExecutionException {
+		try {
+			parallelism.acquire();
+		} catch (InterruptedException e) {
+			throw new ExecutionException(e);
+		}
+		
 		try {
 			lock.lock();
 			
@@ -91,8 +102,9 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 				try {
 					lockCondition.await();
 				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+					throw new ExecutionException(e);
 				}
+				lastIndex.set(0);
 			}
 			
 		} finally {
@@ -116,8 +128,9 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	}
 	
 	private void checkFailure() throws ExecutionException {
-	      try {
+	    try {
 	        lock.lock();
+	        
 	        if (exception != null) {
 	          throw exception;
 	        }
@@ -131,13 +144,12 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	public void awaitCompletion() throws ExecutionException {
 		try {
 			lock.lock();
-			
 			while (!isCompleted()) {
 				checkFailure();
 				try {
 					lockCondition.await();
 				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+					throw new ExecutionException(e);
 				}
 			}
 			checkFailure();
@@ -164,7 +176,7 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	private void finished(V vertex) {
 		try {
 			lock2.lock();
-			//remove from runnning
+			//remove from running
 			if (!running.remove(vertex)) {
 				throw new IllegalArgumentException("Not running, cannot complete: "+vertex);
 			}
@@ -175,5 +187,6 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 			lock2.unlock();
 		}
 	}
+	
 	
 }

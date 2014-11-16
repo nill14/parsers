@@ -39,12 +39,13 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 	final Vertex<V> exceptionMarker = new Vertex<>();
 	
 	private final Semaphore semaphore;
+	private final Semaphore parallelism;
 	
 	private final Map<V, Vertex<V>> vertices;
 
 	private final DirectedGraph<V, ?> graph;
 
-	public <E extends GraphEdge<V>> GraphWalker2(DirectedGraph<V, E> graph, ImmutableList<V> topoList, Map<V, Integer> rankings) {
+	public <E extends GraphEdge<V>> GraphWalker2(DirectedGraph<V, E> graph, ImmutableList<V> topoList, Map<V, Integer> rankings, int parallelism) {
 		this.graph = graph;
 		semaphore = new Semaphore(-graph.nodes().size() + 1);
 		
@@ -61,12 +62,14 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 				workQueue.add(vertex);
 			}
 		}
+		this.parallelism = new Semaphore(parallelism);
 	}
 	
 	
 	@Override
 	public V releaseNext() throws ExecutionException {
 		try {
+			parallelism.acquire();
 			Vertex<V> vertex = workQueue.take();
 			if (vertex == exceptionMarker) {
 				checkFailure();
@@ -89,6 +92,7 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 		}
 		
 		semaphore.release();
+		parallelism.release();
 	}
 
 	@Override
@@ -105,6 +109,7 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 		}
 		workQueue.add(exceptionMarker);
 		semaphore.release(graph.nodes().size());
+		parallelism.release();
 	}
 	
 	@Override

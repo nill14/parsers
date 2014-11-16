@@ -8,9 +8,13 @@ import com.google.common.base.Function;
 public class Module {
 	
 	private final IDependencyDescriptor<String> collector;
+	private final String prefix;
+	private final int counter;
 	
 	private Module(Builder builder) {
 		collector = builder.builder.build();
+		prefix = builder.prefix;
+		counter = builder.counter;
 	}
 
 	public IDependencyDescriptor<String> getCollector() {
@@ -19,6 +23,18 @@ public class Module {
 	
 	public static Builder builder(String name) {
 		return new Builder(name);
+	}
+
+	public static Builder builder(String name, String prefix, int counter) {
+		return new Builder(name, prefix, counter);
+	}
+	
+	public String getPrefix() {
+		return prefix;
+	}
+	
+	public int getCounter() {
+		return counter;
 	}
 	
 	@Override
@@ -37,11 +53,21 @@ public class Module {
 	public static class Builder implements IDependencyDescriptorBuilder<String> {
 		
 		private final IDependencyDescriptorBuilder<String> builder;
+		private final String prefix;
+		private final int counter;
 		
 		public Builder(String name) {
+			this.prefix = name;
+			this.counter = 0;
 			builder = DependencyDescriptor.builder(name);
 		}
 		
+		public Builder(String name, String prefix, int counter) {
+			builder = DependencyDescriptor.builder(name);
+			this.prefix = prefix;
+			this.counter = counter;
+		}
+
 		@Override
 		public Builder uses(String fqn) {
 			builder.uses(fqn);

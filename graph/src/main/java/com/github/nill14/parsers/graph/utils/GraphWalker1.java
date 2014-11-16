@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,10 +27,12 @@ public class GraphWalker1<V> implements GraphWalker<V> {
 	
 	private final Lock lock = new ReentrantLock();
 	private final Condition lockCondition = lock.newCondition();
+	private final Semaphore parallelism;
 
-	public <E extends GraphEdge<V>> GraphWalker1(DirectedGraph<V, E> graph, List<V> topoList) {
+	public <E extends GraphEdge<V>> GraphWalker1(DirectedGraph<V, E> graph, List<V> topoList, int parallelism) {
 		this.graph = graph;
 		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
+		this.parallelism = new Semaphore(parallelism);
 	}
 	
 	@Override
@@ -40,38 +43,46 @@ public class GraphWalker1<V> implements GraphWalker<V> {
 			//reset index
 			lastIndex = 0;
 			
-			//remove from runnning
+			//remove from running
 			if (!running.remove(vertex)) {
 				throw new IllegalArgumentException("Not running, cannot complete: "+vertex);
 			}
 			
 			//add to completed
 			completed.add(vertex);
-			lockCondition.signal();
+			lockCondition.signalAll();
 			
 		} finally {
 			lock.unlock();
 		}
+		parallelism.release();
 	}
 	
 	@Override
 	public void onFailure(V vertex, Exception e) {
-	     try {
-          lock.lock();
-          if (exception == null) {
-        	  exception = new ExecutionException(e);
-          } else {
-        	  exception.addSuppressed(e);
-          }
-          lockCondition.signal();
-          
-      } finally {
-          lock.unlock();
-      }
+		try {
+			lock.lock();
+			if (exception == null) {
+				exception = new ExecutionException(e);
+			} else {
+				exception.addSuppressed(e);
+			}
+			lockCondition.signalAll();
+
+		} finally {
+			lock.unlock();
+		}
+		parallelism.release();
 	}
 	
 	@Override
 	public V releaseNext() throws ExecutionException {
+		try {
+			parallelism.acquire();
+		} catch (InterruptedException e) {
+			throw new ExecutionException(e);
+		}
+		
 		try {
 			lock.lock();
 			

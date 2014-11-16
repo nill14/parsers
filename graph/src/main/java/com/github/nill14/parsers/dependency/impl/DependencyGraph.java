@@ -26,7 +26,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	
 	private final Set<M> modules;
 	private final DirectedGraph<M, GraphEdge<M>> graph;
-	private final LinkedHashMap<M, Integer> moduleRatings;
+	private final LinkedHashMap<M, Integer> moduleRankings;
 	
 	private final ImmutableList<M> topologicalOrdering;
 	private final ImmutableSetMultimap<M,M> dependencies;
@@ -34,8 +34,8 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
-		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
-		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
+		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
+		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
 		
 		SetMultimap<M, M> dependencies = HashMultimap.create();
 		for (M node : topologicalOrdering) {
@@ -50,8 +50,8 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
 		this.graph = graph;
 		this.modules = graph.nodes();
-		moduleRatings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
-		topologicalOrdering = ImmutableList.copyOf(moduleRatings.keySet());
+		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
+		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
 		
 		SetMultimap<M, M> dependencies = HashMultimap.create();
 		for (M node : topologicalOrdering) {
@@ -92,7 +92,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	
 	@Override
 	public Map<M, Integer> getModuleRankings() {
-		return Maps.newLinkedHashMap(moduleRatings);
+		return Maps.newLinkedHashMap(moduleRankings);
 	}
 	
 	@Override
@@ -100,8 +100,30 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 			final IConsumer<M> moduleConsumer)
 			throws ExecutionException {
 		
-		final GraphWalker<M> graphWalker = new GraphWalker3<>(graph, topologicalOrdering);
+		int parallelism = Runtime.getRuntime().availableProcessors();
+		walkGraph(executor, moduleConsumer, parallelism);
+	}
 	
+	@Override
+	public void iterateTopoOrder(IConsumer<M> moduleConsumer) throws ExecutionException {
+		
+		for (M module : topologicalOrdering) {
+			try {
+				moduleConsumer.process(module);
+			} catch (Exception e) {
+				throw new ExecutionException(e);
+			}
+		}
+	}
+
+	
+	public void walkGraph(final ExecutorService executor,
+			final IConsumer<M> moduleConsumer, int parallelism)
+			throws ExecutionException {
+		
+		final GraphWalker<M> graphWalker = new GraphWalker3<>(graph, topologicalOrdering, parallelism);
+//		final GraphWalker<M> graphWalker = new GraphWalker4<>(graph, topologicalOrdering, moduleRankings, parallelism);
+		
 		for (int i = 0; i < graphWalker.size(); i++) {
 			final M module = graphWalker.releaseNext();
 			executor.execute(new Runnable() {
@@ -118,17 +140,4 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		}
 		graphWalker.awaitCompletion();
 	}
-	
-	@Override
-	public void iterateTopoOrder(IConsumer<M> moduleConsumer) throws ExecutionException {
-		
-		for (M module : topologicalOrdering) {
-			try {
-				moduleConsumer.process(module);
-			} catch (Exception e) {
-				throw new ExecutionException(e);
-			}
-		}
-	}
-	
 }

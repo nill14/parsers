@@ -20,6 +20,7 @@ import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.graph.utils.GraphWalker1;
 import com.github.nill14.parsers.graph.utils.GraphWalker2;
 import com.github.nill14.parsers.graph.utils.GraphWalker3;
+import com.github.nill14.parsers.graph.utils.GraphWalker4;
 import com.github.nill14.parsers.graph.utils.GraphWalkerLegacy;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -27,9 +28,14 @@ import com.google.common.collect.Sets;
 public class PerformanceTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(PerformanceTest.class);
-	private static final ExecutorService executor = Executors.newCachedThreadPool();
 	private static Set<Module> modules;
 	private static IDependencyGraph<Module> dependencyGraph;
+	private static DirectedGraph<Module, GraphEdge<Module>> graph;
+	private static ImmutableList<Module> topologicalOrder;
+	private static Map<Module, Integer> moduleRankings;
+	private static final int parallelism = Runtime.getRuntime().availableProcessors();
+//	private static final int parallelism = 20;
+	private static final ExecutorService executor = Executors.newFixedThreadPool(parallelism);
 
 	private static Set<Module> buildChain(String prefix, int count) {
 		Set<Module> set = Sets.newHashSet();
@@ -38,7 +44,7 @@ public class PerformanceTest {
 		
 		for (int i = 2; i <= count; i++ ) {
 			String curr = prefix + "-" + i;
-			set.add(Module.builder(curr).uses(prev).buildModule());
+			set.add(Module.builder(curr, prefix, count).uses(prev).buildModule());
 			prev = curr;
 		}
 		return set;
@@ -47,7 +53,16 @@ public class PerformanceTest {
 	private static final IConsumer<Module> consumer = new IConsumer<Module>() {
 		@Override
 		public void process(Module module) throws Exception {
-			Thread.sleep(1);
+			String p = module.getPrefix();
+			int c = module.getCounter();
+			if (p.startsWith("A") && c == 1) {
+				Thread.sleep(500);
+			} else if (p.startsWith("B") && c == 10) {
+				Thread.sleep(300);
+			}
+			else {
+				Thread.sleep(1);
+			}
 			synchronized (this) {
 				log.info("Executing module {}", module);
 			}
@@ -73,9 +88,12 @@ public class PerformanceTest {
 		
 		PerformanceTest.modules = modules;
 		dependencyGraph = DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
+		graph = dependencyGraph.getGraph();
+		topologicalOrder = ImmutableList.copyOf(dependencyGraph.getTopologicalOrder());
+		moduleRankings = dependencyGraph.getModuleRankings();
 	}
 	
-	@Test
+//	@Test
 	public void createDependencyGraph() throws UnsatisfiedDependencyException, CyclicGraphException {
 		DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
 	}
@@ -85,7 +103,7 @@ public class PerformanceTest {
 		DirectedGraph<Module, GraphEdge<Module>> graph = dependencyGraph.getGraph();
 		ImmutableList<Module> topologicalOrder = ImmutableList.copyOf(dependencyGraph.getTopologicalOrder());
 		Map<Module, Integer> moduleRankings = dependencyGraph.getModuleRankings();
-		return new GraphWalker2<>(graph, topologicalOrder, moduleRankings);
+		return new GraphWalker2<>(graph, topologicalOrder, moduleRankings, parallelism);
 	}
 	
 	public void testRankings() {
@@ -102,27 +120,19 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalker2Complete() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
-		final GraphWalker<Module> graphWalker = createGraphWalker2();
-		for (int i = 0; i < graphWalker.size(); i++) {
-			final Module module = graphWalker.releaseNext();
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						consumer.process(module);
-						graphWalker.onComplete(module);
-					} catch (Exception e) {
-						graphWalker.onFailure(module, e);
-					}
-				}
-			});
-		}
-		graphWalker.awaitCompletion();
+		final GraphWalker<Module> graphWalker = new GraphWalker2<>(graph, topologicalOrder, moduleRankings, parallelism);
+		walk(graphWalker);
 	}
-	
+
+	@Test
+	public void testWalker4Only() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
+		final GraphWalker<Module> graphWalker = new GraphWalker4<>(graph, topologicalOrder, moduleRankings, parallelism);
+		walk(graphWalker);
+	}
+
 	@Test
 	public void testWalkerLegacyOnly() throws InterruptedException, ExecutionException {
-		final GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
+		final GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(graph, topologicalOrder);
 		try {
 			for (final Module module : graphWalker) {
 				executor.execute(new Runnable() {
@@ -146,45 +156,45 @@ public class PerformanceTest {
 	
 	@Test
 	public void testWalker1Only() throws InterruptedException, ExecutionException {
-		final GraphWalker<Module> graphWalker = new GraphWalker1<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
-		for (int i = 0; i < graphWalker.size(); i++) {
-			final Module module = graphWalker.releaseNext();
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						consumer.process(module);
-						graphWalker.onComplete(module);
-					} catch (Exception e) {
-						graphWalker.onFailure(module, e);
-					}
-				}
-			});
-		}
-		graphWalker.awaitCompletion();
+		final GraphWalker<Module> graphWalker = new GraphWalker1<>(graph, topologicalOrder, parallelism);
+		walk(graphWalker);
 	}
 	
 	@Test
 	public void testWalker3Only() throws InterruptedException, ExecutionException {
-		final GraphWalker<Module> graphWalker = new GraphWalker3<>(dependencyGraph.getGraph(), dependencyGraph.getTopologicalOrder());
-		for (int i = 0; i < graphWalker.size(); i++) {
-			final Module module = graphWalker.releaseNext();
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						consumer.process(module);
-						graphWalker.onComplete(module);
-					} catch (Exception e) {
-						graphWalker.onFailure(module, e);
+		final GraphWalker<Module> graphWalker = new GraphWalker3<>(graph, topologicalOrder, parallelism);
+		walk(graphWalker);
+	}
+
+	private void walk(final GraphWalker<Module> graphWalker)
+			throws ExecutionException {
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					for (int i = 0; i < graphWalker.size(); i++) {
+						final Module module = graphWalker.releaseNext();
+						executor.execute(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									consumer.process(module);
+									graphWalker.onComplete(module);
+								} catch (Exception e) {
+									graphWalker.onFailure(module, e);
+								}
+							}
+						});
 					}
+				} catch (ExecutionException e) {
+					throw new RuntimeException(e);
 				}
-			});
-		}
+			}
+		});
 		graphWalker.awaitCompletion();
 	}	
 	
-	@Test
+//	@Test
 	public void testWalkSynchronously() throws InterruptedException, ExecutionException {
 		dependencyGraph.iterateTopoOrder(consumer);
 	}	
