@@ -64,6 +64,7 @@ public interface IDependencyGraph<M> {
 
 	/**
 	 * Synchronous version of {@link #walkGraph(ExecutorService, IConsumer)}
+	 * The order is guaranteed to be the same as {@link #getTopologicalOrder()}
 	 * 
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception

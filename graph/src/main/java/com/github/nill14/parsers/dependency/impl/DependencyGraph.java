@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -16,11 +17,8 @@ import com.github.nill14.parsers.graph.GraphWalker;
 import com.github.nill14.parsers.graph.utils.GraphWalker3;
 import com.github.nill14.parsers.graph.utils.LongestPathTopoSorter;
 import com.google.common.base.Function;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.SetMultimap;
 
 class DependencyGraph<M> implements IDependencyGraph<M> {
 	
@@ -29,7 +27,8 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	private final LinkedHashMap<M, Integer> moduleRankings;
 	
 	private final ImmutableList<M> topologicalOrdering;
-	private final ImmutableSetMultimap<M,M> dependencies;
+//	private final ImmutableSetMultimap<M,M> dependencies;
+	private final Map<M, DependencySet<M>> dependencySets = new ConcurrentHashMap<>();
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
 		this.graph = graph;
@@ -37,14 +36,15 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
 		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
 		
-		SetMultimap<M, M> dependencies = HashMultimap.create();
-		for (M node : topologicalOrdering) {
-			Set<M> directDependencies = graph.predecessors(node);
-			for (M dependency : directDependencies) {
-				dependencies.putAll(node, dependencies.get(dependency));
-			}
-		}
-		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
+		//poor performance
+//		SetMultimap<M, M> dependencies = HashMultimap.create();
+//		for (M node : topologicalOrdering) {
+//			Set<M> directDependencies = graph.predecessors(node);
+//			for (M dependency : directDependencies) {
+//				dependencies.putAll(node, dependencies.get(dependency));
+//			}
+//		}
+//		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
@@ -53,15 +53,16 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
 		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
 		
-		SetMultimap<M, M> dependencies = HashMultimap.create();
-		for (M node : topologicalOrdering) {
-			Set<M> directDependencies = graph.predecessors(node);
-			for (M dependency : directDependencies) {
-				dependencies.put(node, dependency);
-				dependencies.putAll(node, dependencies.get(dependency));
-			}
-		}
-		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
+		//poor performance
+//		SetMultimap<M, M> dependencies = HashMultimap.create();
+//		for (M node : topologicalOrdering) {
+//			Set<M> directDependencies = graph.predecessors(node);
+//			for (M dependency : directDependencies) {
+//				dependencies.put(node, dependency);
+//				dependencies.putAll(node, dependencies.get(dependency));
+//			}
+//		}
+//		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 
 	
@@ -82,7 +83,18 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	
 	@Override
 	public Set<M> getAllDependencies(M module) {
-		return dependencies.get(module);
+		DependencySet<M> dependencySet = dependencySets.get(module);
+		if (dependencySet == null) {
+			synchronized (this) {
+				dependencySet = dependencySets.get(module);
+				if (dependencySet == null) {
+					dependencySet = new DependencySet<M>(this, module);
+					dependencySets.put(module, dependencySet);
+				}
+			}
+		}
+		return dependencySet;
+//		return dependencies.get(module);
 	}
 	
 	@Override

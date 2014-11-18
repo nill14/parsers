@@ -25,8 +25,8 @@ public class Module {
 		return new Builder(name);
 	}
 
-	public static Builder builder(String name, String prefix, int counter) {
-		return new Builder(name, prefix, counter);
+	public static Builder builder(String prefix, int counter) {
+		return new Builder(prefix, counter);
 	}
 	
 	public String getPrefix() {
@@ -35,6 +35,10 @@ public class Module {
 	
 	public int getCounter() {
 		return counter;
+	}
+	
+	public String getName() {
+		return collector.toString();
 	}
 	
 	@Override
@@ -62,8 +66,8 @@ public class Module {
 			builder = DependencyDescriptor.builder(name);
 		}
 		
-		public Builder(String name, String prefix, int counter) {
-			builder = DependencyDescriptor.builder(name);
+		public Builder(String prefix, int counter) {
+			builder = DependencyDescriptor.builder(prefix + "-" + counter);
 			this.prefix = prefix;
 			this.counter = counter;
 		}

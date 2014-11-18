@@ -1,5 +1,7 @@
 package com.github.nill14.parsers.graph;
 
+import static org.junit.Assert.*;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -22,7 +24,10 @@ import com.github.nill14.parsers.graph.utils.GraphWalker2;
 import com.github.nill14.parsers.graph.utils.GraphWalker3;
 import com.github.nill14.parsers.graph.utils.GraphWalker4;
 import com.github.nill14.parsers.graph.utils.GraphWalkerLegacy;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class PerformanceTest {
@@ -37,18 +42,25 @@ public class PerformanceTest {
 //	private static final int parallelism = 20;
 	private static final ExecutorService executor = Executors.newFixedThreadPool(parallelism);
 
-	private static Set<Module> buildChain(String prefix, int count) {
+	private static Set<Module> buildChain(String prefix, int count, int padding) {
 		Set<Module> set = Sets.newHashSet();
-		String prev = prefix + "-1";
-		set.add(Module.builder(prev).buildModule());
+		Module module = Module.builder(prefix, 1).buildModule();
+		set.add(module);
+		String prev = module.getName();
 		
 		for (int i = 2; i <= count; i++ ) {
-			String curr = prefix + "-" + i;
-			set.add(Module.builder(curr, prefix, count).uses(prev).buildModule());
-			prev = curr;
+			module = Module.builder(prefix, i).uses(prev).buildModule();
+			set.add(module);
+			prev = module.getName();
 		}
+		
+		for (int i = count +1; i <= count + padding; i++ ) {
+			set.add(Module.builder(prefix, i).buildModule());
+		}
+		
 		return set;
 	}
+
 	
 	private static final IConsumer<Module> consumer = new IConsumer<Module>() {
 		@Override
@@ -68,6 +80,7 @@ public class PerformanceTest {
 			}
 		}
 	};
+	private static ImmutableMap<String,Module> index;
 
 
 
@@ -75,28 +88,50 @@ public class PerformanceTest {
 	public static void init() throws CyclicGraphException, UnsatisfiedDependencyException {
 		Set<Module> modules = Sets.newHashSet();
 		
-		modules.addAll(buildChain("A", 1000));
-		modules.addAll(buildChain("B", 1000));
-		modules.addAll(buildChain("C", 1000));
-		modules.addAll(buildChain("D", 1000));
-		modules.addAll(buildChain("E", 1000));
-		modules.addAll(buildChain("F", 1000));
-		modules.addAll(buildChain("G", 1000));
-		modules.addAll(buildChain("H", 1000));
-		modules.addAll(buildChain("I", 1000));
-		modules.addAll(buildChain("J", 1000));
+		modules.addAll(buildChain("A", 1000, 10));
+		modules.addAll(buildChain("B", 1000, 10));
+		modules.addAll(buildChain("C", 1000, 10));
+		modules.addAll(buildChain("D", 1000, 10));
+		modules.addAll(buildChain("E", 1000, 10));
+		modules.addAll(buildChain("F", 1000, 10));
+		modules.addAll(buildChain("G", 1000, 10));
+		modules.addAll(buildChain("H", 1000, 10));
+		modules.addAll(buildChain("I", 1000, 10));
+		modules.addAll(buildChain("J", 1000, 10));
 		
 		PerformanceTest.modules = modules;
 		dependencyGraph = DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
 		graph = dependencyGraph.getGraph();
 		topologicalOrder = ImmutableList.copyOf(dependencyGraph.getTopologicalOrder());
 		moduleRankings = dependencyGraph.getModuleRankings();
+		index = Maps.uniqueIndex(modules, new Function<Module, String>() {
+
+			@Override
+			public String apply(Module input) {
+				return input.getPrefix() + "-" + input.getCounter();
+			}
+		});
 	}
 	
-//	@Test
+	@Test
 	public void createDependencyGraph() throws UnsatisfiedDependencyException, CyclicGraphException {
 		DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
 	}
+
+	@Test
+	public void createGraph() throws UnsatisfiedDependencyException {
+		DependencyGraphFactory.newGraph(modules, Module.adapterFunction);
+	}
+
+	@Test
+	public void testDependencies()  {
+
+		Module moduleA = index.get("A-1000");
+		
+		assertEquals(999, dependencyGraph.getAllDependencies(moduleA).size());
+		assertEquals(999, dependencyGraph.getAllDependencies(moduleA).size());
+	}
+	
 	
 	public GraphWalker<Module> createGraphWalker2() throws UnsatisfiedDependencyException, CyclicGraphException {
 		
@@ -106,9 +141,10 @@ public class PerformanceTest {
 		return new GraphWalker2<>(graph, topologicalOrder, moduleRankings, parallelism);
 	}
 	
+	@Test
 	public void testRankings() {
 		for (Entry<Module, Integer> entry : dependencyGraph.getModuleRankings().entrySet()) {
-			log.debug("{}", entry);
+			log.info("{}", entry);
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.DirectedGraph;
@@ -104,7 +105,7 @@ public class DependencyTreePrinter<M> {
 	}
 	
 	/**
-	 * Outputs the dependency tree to System.out
+	 * Outputs dependency tree to System.out
 	 */
 	public void toConsole() {
 		toPrintStream(System.out);
@@ -121,7 +122,7 @@ public class DependencyTreePrinter<M> {
 	}
 	
 	/**
-	 * Outputs the dependency tree to {@link Logger#info(String)}
+	 * Outputs dependency tree to {@link Logger#info(String)}
 	 */
 	public void toInfoLog(Logger log) {
 		if (log.isInfoEnabled()) {
@@ -133,7 +134,7 @@ public class DependencyTreePrinter<M> {
 	}
 	
 	/**
-	 * Outputs the dependency tree to {@link Logger#debug(String)}
+	 * Outputs dependency tree to {@link Logger#debug(String)}
 	 */
 	public void toDebugLog(Logger log) {
 		if (log.isDebugEnabled()) {
@@ -143,5 +144,20 @@ public class DependencyTreePrinter<M> {
 			}
 		}
 	}
+
+	/**
+	 * @deprecated use {@link #toInfoLog(Logger)} instead
+	 */
+	@Deprecated
+	public void toInfoLog() {
+		toInfoLog(LoggerFactory.getLogger(DependencyTreePrinter.class));
+	}
 	
+	/**
+	 * @deprecated use {@link #toDebugLog(Logger)} instead
+	 */
+	@Deprecated
+	public void toDebugLog() {
+		toDebugLog(LoggerFactory.getLogger(DependencyTreePrinter.class));
+	}
 }
