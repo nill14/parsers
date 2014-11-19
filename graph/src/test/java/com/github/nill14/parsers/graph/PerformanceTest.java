@@ -159,10 +159,13 @@ public class PerformanceTest {
 
 	
 	@Test
-	public void referenceParallelExecution() throws Exception {
-		//ignore order and just execute everything.
-		//this measures the time of execution without scheduling
-		//and helps to identify the scheduling overhead.
+	public void rawParallelExecution() throws Exception {
+		/* ignore order and just execute everything.
+		 * this measures time of the execution without any dependencies
+		 * and it helps to identify the eventual walking overhead.
+		 * For 4 threads the execution time is equal with walker's
+		 * For 20 threads the walker takes double time (1.8x)
+		 */
 		final Semaphore parallelism = new Semaphore(PerformanceTest.parallelism);
 		for (final Module module : topologicalOrder) {
 			parallelism.acquire();
@@ -194,29 +197,21 @@ public class PerformanceTest {
 
 	private void walk(final GraphWalker<Module> graphWalker)
 			throws ExecutionException {
-		executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					for (int i = 0; i < graphWalker.size(); i++) {
-						final Module module = graphWalker.releaseNext();
-						executor.execute(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									consumer.process(module);
-									graphWalker.onComplete(module);
-								} catch (Exception e) {
-									graphWalker.onFailure(module, e);
-								}
-							}
-						});
+		
+		for (int i = 0; i < graphWalker.size(); i++) {
+			final Module module = graphWalker.releaseNext();
+			executor.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						consumer.process(module);
+						graphWalker.onComplete(module);
+					} catch (Exception e) {
+						graphWalker.onFailure(module, e);
 					}
-				} catch (ExecutionException e) {
-					throw new RuntimeException(e);
 				}
-			}
-		});
+			});
+		}
 		graphWalker.awaitCompletion();
 	}	
 	

@@ -9,51 +9,33 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 
 public class DependencyTreePrinter<M> {
 	
 	private final DirectedGraph<M, GraphEdge<M>> graph;
 	private final Map<M, Integer> moduleRatings;
-	private final SetMultimap<M, M> directDependencies = HashMultimap.create();
-	private final SetMultimap<M, M> transitiveDependencies = HashMultimap.create();
 	private final List<M> topologicalOrder;
+	private final boolean filterTransitive;
+	private final IDependencyGraph<M> dependencyGraph;
 
 	public DependencyTreePrinter(IDependencyGraph<M> dependencyGraph) {
-		//by default, do not filter indirect dependencies
-		//filtering produces little bit shorter list but may be confusing
-		this(dependencyGraph, false);
+		this(dependencyGraph, true);
 	}
 	
 	public DependencyTreePrinter(IDependencyGraph<M> dependencyGraph, boolean filterTransitive) {
+		this.dependencyGraph = dependencyGraph;
+		this.filterTransitive = filterTransitive;
 		this.graph = dependencyGraph.getGraph();
 		moduleRatings = dependencyGraph.getModuleRankings();
 		
 		topologicalOrder = dependencyGraph.getTopologicalOrder();
-		
-		for (M node : topologicalOrder) {
-			Set<M> dependencies = graph.predecessors(node);
-			directDependencies.putAll(node, dependencies);
-			for (M dependency : dependencies) {
-				transitiveDependencies.putAll(node, directDependencies.get(dependency));
-				transitiveDependencies.putAll(node, transitiveDependencies.get(dependency));
-			}
-		}
-		
-		if (filterTransitive) {
-			for (M node : topologicalOrder) {
-				Set<M> direct = directDependencies.get(node);
-				Set<M> transitive = transitiveDependencies.get(node);
-				direct.removeAll(transitive);
-			}
-		}
 	}
 	
 	private Collection<M> findRootNodes() {
@@ -62,46 +44,73 @@ public class DependencyTreePrinter<M> {
 			public boolean apply(M vertex) {
 				return !graph.hasSucccessors(vertex);
 			}
-		}).toSet();
+		}).toList();
 	}
 	
-	private void visitRootNode(Collection<String> result, M vertex) {
-		result.add(printLine(vertex, "", ""));
-		visitNode(result, "", vertex);
+	private void visitRootNode(IConsumer<String> lineConsumer, M vertex, Set<M> visited) {
+		printLine(lineConsumer, vertex, "", "");
+		visitNode(lineConsumer, "", vertex, visited);
 	}
 	
-	private void visitNode(Collection<String> result, String prefix, M vertex) {
-		Set<M> predecessors = directDependencies.get(vertex);
-		int count = 0;
-		for (M n : predecessors) {
-			boolean last = ++count == predecessors.size();
-			if (last) {
-				result.add(printLine(n, prefix, " \\- "));
-				visitNode(result, prefix + "   ", n);
+	private void visitNode(IConsumer<String> lineConsumer, String prefix, M vertex, Set<M> visited) {
+		Set<M> predecessors = dependencyGraph.getDirectDependencies(vertex);
+		if (filterTransitive && !predecessors.isEmpty() && visited.contains(vertex)) {
+			int count = dependencyGraph.getAllDependencies(vertex).size();
+			if (count > 1) {
+				// print skipped line when we can just print the line is overkill
+				printSkippedLine(lineConsumer, prefix, count);
 			} else {
-				result.add(printLine(n, prefix, " +- "));
-				visitNode(result, prefix + " | ", n);
+				printLine(lineConsumer, predecessors.iterator().next(), prefix, " \\- ");
+			}
+		} else {
+			visited.add(vertex);
+			int count = 0;
+			for (M n : predecessors) {
+				boolean last = ++count == predecessors.size();
+				if (last) {
+					printLine(lineConsumer, n, prefix, " \\- ");
+					visitNode(lineConsumer, prefix + "   ", n, visited);
+				} else {
+					printLine(lineConsumer, n, prefix, " +- ");
+					visitNode(lineConsumer, prefix + " | ", n, visited);
+				}
 			}
 		}
 	}
 	
-	private String printLine(M vertex, String prefix, String next) {
+	private void printLine(IConsumer<String> lineConsumer, M vertex, String prefix, String next) {
 		StringBuilder b = new StringBuilder();
 		b.append(prefix);
 		b.append(next);
 	
 		int rating = moduleRatings.get(vertex);
 		b.append(String.format("%s (%d)", vertex, rating));
-		return b.toString();
+		try {
+			lineConsumer.process(b.toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void printSkippedLine(IConsumer<String> lineConsumer, String prefix, int count) {
+		StringBuilder b = new StringBuilder();
+		b.append(prefix);
+		b.append(" \\- ");
+	
+		b.append(String.format("... (skipped %d other dependencies)", count));
+		try {
+			lineConsumer.process(b.toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
-	public Collection<String> getLines() {
-		Collection<String> result = Lists.newArrayList();
+	public void processLines(IConsumer<String> lineConsumer) {
+		Set<M> visited = Sets.newHashSet();
 		Collection<M> rootNodes = findRootNodes();
 		for (M rootNode : rootNodes) {
-			visitRootNode(result, rootNode);
+			visitRootNode(lineConsumer, rootNode, visited);
 		}
-		return result;
 	}
 	
 	/**
@@ -114,34 +123,43 @@ public class DependencyTreePrinter<M> {
 	/**
 	 * Outputs the dependency tree to a PrintStream
 	 */
-	public void toPrintStream(PrintStream p) {
+	public void toPrintStream(final PrintStream p) {
 		p.println("Dependency tree");
-		for (String line : getLines()) {
-			p.println(line);
-		}
+		processLines(new IConsumer<String>() {
+			@Override
+			public void process(String line) {
+				p.println(line);
+			}
+		});
 	}
 	
 	/**
 	 * Outputs dependency tree to {@link Logger#info(String)}
 	 */
-	public void toInfoLog(Logger log) {
+	public void toInfoLog(final Logger log) {
 		if (log.isInfoEnabled()) {
 			log.info("Dependency tree");
-			for (String line : getLines()) {
-				log.info(line);
-			}
+			processLines(new IConsumer<String>() {
+				@Override
+				public void process(String line) {
+					log.info(line);
+				}
+			});
 		}
 	}
 	
 	/**
 	 * Outputs dependency tree to {@link Logger#debug(String)}
 	 */
-	public void toDebugLog(Logger log) {
+	public void toDebugLog(final Logger log) {
 		if (log.isDebugEnabled()) {
 			log.debug("Dependency tree");
-			for (String line : getLines()) {
-				log.debug(line);
-			}
+			processLines(new IConsumer<String>() {
+				@Override
+				public void process(String line) {
+					log.debug(line);
+				}
+			});
 		}
 	}
 

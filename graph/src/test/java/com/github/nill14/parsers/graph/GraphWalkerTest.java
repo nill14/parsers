@@ -1,11 +1,8 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -22,8 +19,8 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.IConsumer;
+import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
@@ -211,10 +208,7 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
-		Collection<String> lines = new DependencyTreePrinter<>(dependencyGraph, true).getLines();
-		for (String line : lines) {
-			log.info(line);
-		}
+		new DependencyTreePrinter<>(dependencyGraph, true).toInfoLog(log);
 	}
 
 	@Test
