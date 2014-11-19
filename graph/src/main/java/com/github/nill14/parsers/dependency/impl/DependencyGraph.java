@@ -27,7 +27,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	private final LinkedHashMap<M, Integer> moduleRankings;
 	
 	private final ImmutableList<M> topologicalOrdering;
-//	private final ImmutableSetMultimap<M,M> dependencies;
 	private final Map<M, DependencySet<M>> dependencySets = new ConcurrentHashMap<>();
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph) throws CyclicGraphException {
@@ -35,16 +34,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		this.modules = graph.nodes();
 		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap();
 		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
-		
-		//poor performance
-//		SetMultimap<M, M> dependencies = HashMultimap.create();
-//		for (M node : topologicalOrdering) {
-//			Set<M> directDependencies = graph.predecessors(node);
-//			for (M dependency : directDependencies) {
-//				dependencies.putAll(node, dependencies.get(dependency));
-//			}
-//		}
-//		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 	
 	public DependencyGraph(DirectedGraph<M, GraphEdge<M>> graph, Function<M, Integer> priorityFunction) throws CyclicGraphException {
@@ -53,16 +42,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		moduleRankings = new LongestPathTopoSorter<>(graph).getLongestPathMap(priorityFunction);
 		topologicalOrdering = ImmutableList.copyOf(moduleRankings.keySet());
 		
-		//poor performance
-//		SetMultimap<M, M> dependencies = HashMultimap.create();
-//		for (M node : topologicalOrdering) {
-//			Set<M> directDependencies = graph.predecessors(node);
-//			for (M dependency : directDependencies) {
-//				dependencies.put(node, dependency);
-//				dependencies.putAll(node, dependencies.get(dependency));
-//			}
-//		}
-//		this.dependencies = ImmutableSetMultimap.copyOf(dependencies);
 	}
 
 	
@@ -85,7 +64,11 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	public Set<M> getAllDependencies(M module) {
 		DependencySet<M> dependencySet = dependencySets.get(module);
 		if (dependencySet == null) {
-			synchronized (this) {
+			/*
+			 * I don't like sync over exposed object
+			 * but this is the fastest alternative.
+			 */			
+			synchronized (module) {
 				dependencySet = dependencySets.get(module);
 				if (dependencySet == null) {
 					dependencySet = new DependencySet<M>(this, module);
@@ -94,7 +77,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 			}
 		}
 		return dependencySet;
-//		return dependencies.get(module);
 	}
 	
 	@Override

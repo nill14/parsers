@@ -20,7 +20,7 @@ public class DependencySet<M> implements Set<M> {
 	private Set<M> buildSet() {
 		Set<M> set = this.set;
 		if (set == null) {
-			synchronized (this) {
+			synchronized (module) {
 				set = this.set;
 				if (set == null) {
 					ImmutableSet.Builder<M> builder = ImmutableSet.builder();

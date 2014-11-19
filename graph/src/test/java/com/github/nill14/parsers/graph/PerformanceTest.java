@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -166,6 +167,29 @@ public class PerformanceTest {
 		walk(graphWalker);
 	}
 
+	
+	@Test
+	public void referenceParallelExecution() throws Exception {
+		//ignore order and just execute everything.
+		//this measures the time of execution without scheduling
+		//and helps to identify the scheduling overhead.
+		final Semaphore parallelism = new Semaphore(PerformanceTest.parallelism);
+		for (final Module module : topologicalOrder) {
+			parallelism.acquire();
+			executor.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						consumer.process(module);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+					parallelism.release();
+				}
+			});
+		}
+	}
+	
 	@Test
 	public void testWalkerLegacyOnly() throws InterruptedException, ExecutionException {
 		final GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(graph, topologicalOrder);
