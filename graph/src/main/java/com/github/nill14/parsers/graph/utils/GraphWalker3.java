@@ -19,18 +19,22 @@ import com.google.common.collect.Sets;
 public class GraphWalker3<V> implements GraphWalker<V> {
 
 	private final DirectedGraph<V, ?> graph;
+	
+	private final Lock schedulingLock = new ReentrantLock();
 	private final List<V> topoList;
+	
+	private final Lock exceptionLock = new ReentrantLock();
 	private ExecutionException exception;
 	
 	private AtomicInteger lastIndex = new AtomicInteger(0);
 	private final Semaphore parallelism;
 
-	private final Lock lock2 = new ReentrantLock();
+	private final Lock statusLock = new ReentrantLock();
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
 	
-	private final Lock lock = new ReentrantLock();
-	private final Condition lockCondition = lock.newCondition();
+	private final Lock waitLock = new ReentrantLock();
+	private final Condition waitLockCondition = waitLock.newCondition();
 
 	public <E extends GraphEdge<V>> GraphWalker3(DirectedGraph<V, E> graph, List<V> topoList, int parallelism) {
 		this.graph = graph;
@@ -45,29 +49,24 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 		//reset index
 		lastIndex.set(0);
 		
-		try {
-			lock.lock();
-			lockCondition.signalAll();
-		} finally {
-			lock.unlock();
-		}
+		signal();
 		parallelism.release();
 	}
-	
+
 	@Override
 	public void onFailure(V vertex, Exception e) {
 		try {
-			lock.lock();
+			exceptionLock.lock();
 			if (exception == null) {
 				exception = new ExecutionException(e);
 			} else {
 				exception.addSuppressed(e);
 			}
-			lockCondition.signalAll();
 
 		} finally {
-			lock.unlock();
+			exceptionLock.unlock();
 		}
+		signal();
 	    parallelism.release();
 	}
 	
@@ -79,11 +78,11 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 			throw new ExecutionException(e);
 		}
 		
-		try {
-			lock.lock();
-			
-			while (true) {
-				checkFailure();
+		while (true) {
+			checkFailure();
+			try {
+				schedulingLock.lock();
+
 				if (topoList.isEmpty()) {
 					throw new NoSuchElementException();
 				} 
@@ -97,28 +96,25 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 					}
 					i = lastIndex.getAndIncrement();
 				}
-				
-				// none was found, start waiting
-				try {
-					lockCondition.await();
-				} catch (InterruptedException e) {
-					throw new ExecutionException(e);
-				}
-				lastIndex.set(0);
+			} finally {
+				schedulingLock.unlock();
 			}
 			
-		} finally {
-			lock.unlock();
+			// none was found, start waiting
+			await();
+			lastIndex.set(0);
 		}
 	}
+
+
 	
 	@Override
 	public boolean isCompleted() {
 		try {
-			lock2.lock();
+			statusLock.lock();
 			return completed.size() == size(); 
 		} finally {
-			lock2.unlock();
+			statusLock.unlock();
 		}
 	}
 	
@@ -129,53 +125,43 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	
 	private void checkFailure() throws ExecutionException {
 	    try {
-	        lock.lock();
+	    	exceptionLock.lock();
 	        
 	        if (exception != null) {
 	          throw exception;
 	        }
 	        
 	    } finally {
-	        lock.unlock();
+	    	exceptionLock.unlock();
 	    }
 	}
 	
 	@Override
 	public void awaitCompletion() throws ExecutionException {
-		try {
-			lock.lock();
-			while (!isCompleted()) {
-				checkFailure();
-				try {
-					lockCondition.await();
-				} catch (InterruptedException e) {
-					throw new ExecutionException(e);
-				}
-			}
+		while (!isCompleted()) {
 			checkFailure();
-			
-		} finally {
-			lock.unlock();
+			await();
 		}
+		checkFailure();
 	}
 
 	private boolean doStartIfPossible(V vertex) {
 		Set<V> set = graph.predecessors(vertex);
 		try {
-			lock2.lock();
+			statusLock.lock();
 			boolean isReleaseable = set.isEmpty() || completed.containsAll(set);
 			if (isReleaseable) {
 				running.add(vertex);
 			}
 			return isReleaseable;
 		} finally {
-			lock2.unlock();
+			statusLock.unlock();
 		}
 	}
 
 	private void finished(V vertex) {
 		try {
-			lock2.lock();
+			statusLock.lock();
 			//remove from running
 			if (!running.remove(vertex)) {
 				throw new IllegalArgumentException("Not running, cannot complete: "+vertex);
@@ -184,9 +170,27 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 			//add to completed
 			completed.add(vertex);
 		} finally {
-			lock2.unlock();
+			statusLock.unlock();
 		}
 	}
 	
+	private void signal() {
+		try {
+			waitLock.lock();
+			waitLockCondition.signalAll();
+		} finally {
+			waitLock.unlock();
+		}
+	}
 	
+	private void await() throws ExecutionException {
+		try {
+			waitLock.lock();
+			waitLockCondition.await();
+		} catch (InterruptedException e) {
+			throw new ExecutionException(e);
+		} finally {
+			waitLock.unlock();
+		}
+	}	
 }
