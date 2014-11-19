@@ -3,7 +3,6 @@ package com.github.nill14.parsers.graph;
 import static org.junit.Assert.*;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +18,7 @@ import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
+import com.github.nill14.parsers.dependency.impl.ModuleRankingsPrinter;
 import com.github.nill14.parsers.graph.utils.GraphWalker1;
 import com.github.nill14.parsers.graph.utils.GraphWalker2;
 import com.github.nill14.parsers.graph.utils.GraphWalker3;
@@ -141,14 +141,6 @@ public class PerformanceTest {
 	}
 	
 	@Test
-	public void testRankings() {
-		for (Entry<Module, Integer> entry : dependencyGraph.getModuleRankings().entrySet()) {
-			log.info("{}", entry);
-		}
-	}
-
-
-	@Test
 	public void testWalk() throws InterruptedException, ExecutionException {
 		dependencyGraph.walkGraph(executor, consumer);
 	}
@@ -231,6 +223,11 @@ public class PerformanceTest {
 //	@Test
 	public void testWalkSynchronously() throws InterruptedException, ExecutionException {
 		dependencyGraph.iterateTopoOrder(consumer);
+	}	
+	
+	@Test
+	public void testModuleRankings() {
+		new ModuleRankingsPrinter<>(dependencyGraph).toInfoLog(log);
 	}	
 	
 	

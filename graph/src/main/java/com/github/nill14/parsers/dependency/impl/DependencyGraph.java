@@ -63,6 +63,10 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 	
 	@Override
 	public Set<M> getAllDependencies(M module) {
+		if (module == null) {
+			throw new NullPointerException();
+		}
+		
 		DependencySet<M> dependencySet = dependencySets.get(module);
 		if (dependencySet == null) {
 			/*

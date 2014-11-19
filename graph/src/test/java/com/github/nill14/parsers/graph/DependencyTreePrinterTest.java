@@ -1,10 +1,10 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Set;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
+import com.github.nill14.parsers.dependency.impl.ModuleRankingsPrinter;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -22,14 +23,14 @@ public class DependencyTreePrinterTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(DependencyTreePrinterTest.class);
 	
-	private DirectedGraph<Module, GraphEdge<Module>> graph;
-	private Set<Module> modules;
-	private IDependencyGraph<Module> dependencyGraph;
-	private ImmutableMap<String, Module> moduleIndex;
+	private static DirectedGraph<Module, GraphEdge<Module>> graph;
+	private static Set<Module> modules;
+	private static IDependencyGraph<Module> dependencyGraph;
+	private static ImmutableMap<String, Module> moduleIndex;
 
 
-	@Before
-	public void init() throws CyclicGraphException, UnsatisfiedDependencyException {
+	@BeforeClass
+	public static void init() throws CyclicGraphException, UnsatisfiedDependencyException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
 				.provides("A")
@@ -101,12 +102,17 @@ public class DependencyTreePrinterTest {
 	}
 	
 	@Test
-	public void testLog() {
+	public void testDependencyTreeShort() {
 		new DependencyTreePrinter<>(dependencyGraph, true).toInfoLog(log);;
 	}
 
 	@Test
-	public void testLog2() {
+	public void testDependencyTreeLong() {
 		new DependencyTreePrinter<>(dependencyGraph, false).toInfoLog(log);
+	}
+	
+	@Test
+	public void testModuleRankings() {
+		new ModuleRankingsPrinter<>(dependencyGraph).toInfoLog(log);
 	}	
 }
