@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
@@ -95,6 +96,13 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 			throws ExecutionException {
 		
 		int parallelism = Runtime.getRuntime().availableProcessors();
+		if (executor instanceof ThreadPoolExecutor) {
+			int coreSize = ((ThreadPoolExecutor) executor).getCorePoolSize();
+			int maxSize = ((ThreadPoolExecutor) executor).getMaximumPoolSize();
+			
+			parallelism = Math.max(parallelism, coreSize);
+			parallelism = Math.min(parallelism, maxSize);
+		}
 		walkGraph(executor, moduleConsumer, parallelism);
 	}
 	
@@ -116,7 +124,6 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 			throws ExecutionException {
 		
 		final GraphWalker<M> graphWalker = new GraphWalker3<>(graph, topologicalOrdering, parallelism);
-//		final GraphWalker<M> graphWalker = new GraphWalker4<>(graph, topologicalOrdering, moduleRankings, parallelism);
 		
 		for (int i = 0; i < graphWalker.size(); i++) {
 			final M module = graphWalker.releaseNext();

@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,7 +23,6 @@ import com.github.nill14.parsers.graph.utils.GraphWalker1;
 import com.github.nill14.parsers.graph.utils.GraphWalker2;
 import com.github.nill14.parsers.graph.utils.GraphWalker3;
 import com.github.nill14.parsers.graph.utils.GraphWalker4;
-import com.github.nill14.parsers.graph.utils.GraphWalkerLegacy;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -156,13 +154,13 @@ public class PerformanceTest {
 	}
 	
 	@Test
-	public void testWalker2Complete() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
+	public void testWalker2() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
 		final GraphWalker<Module> graphWalker = new GraphWalker2<>(graph, topologicalOrder, moduleRankings, parallelism);
 		walk(graphWalker);
 	}
 
 	@Test
-	public void testWalker4Only() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
+	public void testWalker4() throws InterruptedException, ExecutionException, UnsatisfiedDependencyException, CyclicGraphException {
 		final GraphWalker<Module> graphWalker = new GraphWalker4<>(graph, topologicalOrder, moduleRankings, parallelism);
 		walk(graphWalker);
 	}
@@ -191,37 +189,13 @@ public class PerformanceTest {
 	}
 	
 	@Test
-	public void testWalkerLegacyOnly() throws InterruptedException, ExecutionException {
-		final GraphWalkerLegacy<Module> graphWalker = new GraphWalkerLegacy<>(graph, topologicalOrder);
-		try {
-			for (final Module module : graphWalker) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							consumer.process(module);
-							graphWalker.onComplete(module);
-						} catch (Exception e) {
-							graphWalker.onFailure(e);
-						}
-					}
-				});
-			}
-			graphWalker.awaitCompletion();
-			
-		} catch (NoSuchElementException e) {
-			graphWalker.checkFailure();
-		}
-	}
-	
-	@Test
-	public void testWalker1Only() throws InterruptedException, ExecutionException {
+	public void testWalker1() throws InterruptedException, ExecutionException {
 		final GraphWalker<Module> graphWalker = new GraphWalker1<>(graph, topologicalOrder, parallelism);
 		walk(graphWalker);
 	}
 	
 	@Test
-	public void testWalker3Only() throws InterruptedException, ExecutionException {
+	public void testWalker3() throws InterruptedException, ExecutionException {
 		final GraphWalker<Module> graphWalker = new GraphWalker3<>(graph, topologicalOrder, parallelism);
 		walk(graphWalker);
 	}
