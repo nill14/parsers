@@ -1,7 +1,7 @@
 package com.github.nill14.parsers.graph.utils;
 
-import java.util.Comparator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -29,14 +29,8 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 	private final Lock lock = new ReentrantLock();
 	private ExecutionException exception;
 	
-	private final Comparator<Vertex<V>> rankingComparator = new Comparator<Vertex<V>>() {
-		@Override
-		public int compare(Vertex<V> o1, Vertex<V> o2) {
-			return Integer.compare(o2.ranking, o1.ranking);
-		}
-	};
-	private final BlockingQueue<Vertex<V>> workQueue = new PriorityBlockingQueue<>(11, rankingComparator);
-	final Vertex<V> exceptionMarker = new Vertex<>();
+	private final BlockingQueue<Vertex<V>> workQueue = new PriorityBlockingQueue<>();
+	private final Vertex<V> exceptionMarker = new Vertex<>();
 	
 	private final Semaphore semaphore;
 	private final Semaphore parallelism;
@@ -54,7 +48,7 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 		for (V node : topoList.reverse()) {
 			int ranking = rankings.get(node);
 			int permits = -graph.predecessors(node).size();
-			ImmutableSet<Vertex<V>> successors = ImmutableSet.copyOf(graph.successors(node, f));
+			Set<Vertex<V>> successors = graph.successors(node, f);
 			Vertex<V> vertex = new Vertex<V>(node, ranking, permits, successors);
 			vertices.put(node, vertex);
 			
@@ -143,13 +137,13 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 		checkFailure();
 	}
 	
-	private static final class Vertex<V> {
+	private static final class Vertex<V> implements Comparable<Vertex<V>> {
 		final V node;
 		final int ranking;
 		final AtomicInteger permits;
-		final ImmutableSet<Vertex<V>> successors;
+		final Set<Vertex<V>> successors;
 
-		public Vertex(V node, int ranking, int permits, ImmutableSet<Vertex<V>> successors) {
+		public Vertex(V node, int ranking, int permits, Set<Vertex<V>> successors) {
 			this.node = node;
 			this.ranking = ranking;
 			this.successors = successors;
@@ -161,6 +155,11 @@ public class GraphWalker2<V> implements GraphWalker<V> {
 			ranking = Integer.MAX_VALUE;
 			permits = new AtomicInteger();
 			successors = ImmutableSet.of();
+		}
+		
+		@Override
+		public int compareTo(Vertex<V> o) {
+			return Integer.compare(o.ranking, this.ranking);
 		}
 		
 	}

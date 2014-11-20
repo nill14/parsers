@@ -140,7 +140,7 @@ public class GraphWalker4<V> implements GraphWalker<V> {
 
 		@Override
 		public int compareTo(RankedElement o) {
-			return this.ranking - o.ranking;
+			return Integer.compare(o.ranking, this.ranking);
 		}
 
 		@Override
