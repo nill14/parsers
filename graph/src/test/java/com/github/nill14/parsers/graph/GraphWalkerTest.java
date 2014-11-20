@@ -24,7 +24,10 @@ import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.dependency.impl.DependencyTreePrinter;
+import com.github.nill14.parsers.dependency.impl.ModuleRankingsPrinter;
+import com.github.nill14.parsers.graph.utils.GraphWalker3;
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -41,6 +44,7 @@ public class GraphWalkerTest {
 
 
 	@Rule public ExpectedException thrown = ExpectedException.none();
+	private ImmutableList<Module> topoList;
 
 	@Before
 	public void init() throws CyclicGraphException, UnsatisfiedDependencyException {
@@ -92,6 +96,7 @@ public class GraphWalkerTest {
 		
 		dependencyGraph = DependencyGraphFactory.newInstance(modules, Module.adapterFunction);
 		graph = dependencyGraph.getGraph();
+		topoList = ImmutableList.copyOf(dependencyGraph.getTopologicalOrder());
 		
 		moduleIndex = Maps.uniqueIndex(modules, new Function<Module, String>() {
 
@@ -127,7 +132,7 @@ public class GraphWalkerTest {
 		}
 	}
 	
-	@Test
+	@Test(timeout=1000)
 	public void testWalk() throws InterruptedException, ExecutionException {
 		log.info("testWalk start");
 		final AtomicInteger count = new AtomicInteger();
@@ -174,7 +179,7 @@ public class GraphWalkerTest {
 	}	
 	
 	
-	@Test
+	@Test(timeout=1000)
 	public void testException() throws InterruptedException, IOException {
 		final AtomicInteger count = new AtomicInteger();
 		
@@ -208,10 +213,11 @@ public class GraphWalkerTest {
 	
 	@Test
 	public void testLog() {
+		new ModuleRankingsPrinter<>(dependencyGraph).toInfoLog(log);
 		new DependencyTreePrinter<>(dependencyGraph, true).toInfoLog(log);
 	}
 
-	@Test
+	@Test(timeout=1000)
 	public void testExhaustException() throws InterruptedException, IOException {
 		final AtomicInteger count = new AtomicInteger();
 		
@@ -245,7 +251,7 @@ public class GraphWalkerTest {
 		assertEquals(modules.size(), count.get());
 	}
 	
-	@Test
+	@Test(timeout=2000)
 	public void testExhaustAndContinue() throws InterruptedException, ExecutionException {
 		final AtomicInteger count = new AtomicInteger();
 		
@@ -265,6 +271,47 @@ public class GraphWalkerTest {
 		
 		assertEquals(modules.size(), count.get());
 	}
+	
+	@Test(timeout=1000)
+	public void testExhaustWalker() throws InterruptedException, IOException, ExecutionException {
+		//there are five releaseable modules at the beginning
+		final GraphWalker3<Module> walker = new GraphWalker3<>(graph, topoList, 1000);
+		final Module next = walker.releaseNext();
+		walker.releaseNext();
+		walker.releaseNext();
+		walker.releaseNext();
+		
+		walker.releaseNext();
+		executor.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				walker.onComplete(next);
+			}
+		});
+		Thread.sleep(100);
+		walker.releaseNext();
+	}
+	
+
+	@Test(timeout=2000)
+	public void testExhaustAndContinue2() throws InterruptedException, ExecutionException {
+		final AtomicInteger count = new AtomicInteger();
+		
+		dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
+			
+			@Override
+			public void process(Module module) throws Exception {
+				log.info("Starting module {}", module);
+				Thread.sleep(5);
+				log.info("Completing module {}", module);
+				count.incrementAndGet();
+			}
+		});
+		
+		assertEquals(modules.size(), count.get());
+	}
+	
 	
 	@Test
 	public void testDependencies() {

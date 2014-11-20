@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,13 +32,15 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	private final Set<V> running = Sets.newHashSet();
 	private final Set<V> completed = Sets.newHashSet();
 	
-	private final Lock waitLock = new ReentrantLock();
-	private final Condition waitLockCondition = waitLock.newCondition();
+	private final Semaphore releaseFlag = new Semaphore(0);
+	private final Semaphore countDown;
 
 	public <E extends GraphEdge<V>> GraphWalker3(DirectedGraph<V, E> graph, List<V> topoList, int parallelism) {
 		this.graph = graph;
 		this.topoList = Lists.newArrayList(topoList); // make a copy - only we can mutate the list
 		this.parallelism = new Semaphore(parallelism);
+		
+		this.countDown = new Semaphore(-topoList.size() + 1);
 	}
 	
 	@Override
@@ -49,8 +50,9 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 		//reset index
 		lastIndex.set(0);
 		
-		signal();
+		releaseFlag.release();
 		parallelism.release();
+		countDown.release();
 	}
 
 	@Override
@@ -66,8 +68,9 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 		} finally {
 			exceptionLock.unlock();
 		}
-		signal();
+		releaseFlag.release();
 	    parallelism.release();
+		countDown.release(size());
 	}
 	
 	@Override
@@ -87,6 +90,14 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 					throw new NoSuchElementException();
 				} 
 				
+				//exhaustion and lastIndex together control the execution.
+				//The lastIndex only is not enough for we would just burn processor time
+				//in case no element is available yet.
+				//If exhaustion only is used for control
+				//then we need to start iteration always from 0.
+				//It means, if we don't reset lastIndex in onComplete method,
+				//then we need to do it right here.
+				releaseFlag.drainPermits();
 				int i = lastIndex.getAndIncrement();
 				while (i < topoList.size()) {
 					V vertex = topoList.get(i);
@@ -101,8 +112,12 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 			}
 			
 			// none was found, start waiting
-			await();
-			lastIndex.set(0);
+			try {
+//				Thread.sleep(50); //testing
+				releaseFlag.acquire();
+			} catch (InterruptedException e) {
+				throw new ExecutionException(e);
+			}
 		}
 	}
 
@@ -140,7 +155,11 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 	public void awaitCompletion() throws ExecutionException {
 		while (!isCompleted()) {
 			checkFailure();
-			await();
+			try {
+				countDown.acquire();
+			} catch (InterruptedException e) {
+				throw new ExecutionException(e);
+			}
 		}
 		checkFailure();
 	}
@@ -171,26 +190,6 @@ public class GraphWalker3<V> implements GraphWalker<V> {
 			completed.add(vertex);
 		} finally {
 			statusLock.unlock();
-		}
-	}
-	
-	private void signal() {
-		try {
-			waitLock.lock();
-			waitLockCondition.signalAll();
-		} finally {
-			waitLock.unlock();
-		}
-	}
-	
-	private void await() throws ExecutionException {
-		try {
-			waitLock.lock();
-			waitLockCondition.await();
-		} catch (InterruptedException e) {
-			throw new ExecutionException(e);
-		} finally {
-			waitLock.unlock();
 		}
 	}	
 }
