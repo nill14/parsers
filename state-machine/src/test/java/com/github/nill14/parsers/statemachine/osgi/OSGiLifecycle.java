@@ -1,4 +1,4 @@
-package com.github.nill14.parsers.statemachine;
+package com.github.nill14.parsers.statemachine.osgi;
 
 public enum OSGiLifecycle {
 	UNINSTALLED,

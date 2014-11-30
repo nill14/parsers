@@ -1,4 +1,4 @@
-package com.github.nill14.parsers.statemachine;
+package com.github.nill14.parsers.statemachine.osgi;
 
 public enum OSGiOperation {
 	START,
@@ -8,5 +8,6 @@ public enum OSGiOperation {
 	RESOLVE,
 	UPDATE,
 	STOPPED,
-	STARTED
+	STARTED,
+	FAILED
 }

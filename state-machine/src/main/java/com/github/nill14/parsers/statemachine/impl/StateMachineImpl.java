@@ -13,46 +13,81 @@ import com.github.nill14.parsers.statemachine.SymbolChain;
 import com.github.nill14.parsers.statemachine.TransitionListener;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 
 public class StateMachineImpl<E extends Comparable<? super E>, A extends Comparable<? super A>> implements StateMachine<E, A> {
 
 	private final DFA<E, A> automaton;
+	private final ImmutableMap<A, Symbol<A>> symbolIndex;
+	private final ImmutableSetMultimap<E, State<E>> stateIndex;
 	private final StateChangeHelper<E, A> helper = new StateChangeHelper<>();
+
 	private State<E> state;
-	private SymbolChain<A> symbols = EmptySymbolChain.getInstance();
-	private ImmutableMap<A, Symbol<A>> symbolIndex;
+	private SymbolChain<A> symbols;
 
 	public StateMachineImpl(DFA<E, A> automaton) {
 		this.automaton = automaton;
+		this.symbolIndex = Maps.uniqueIndex(automaton.alphabet(), a -> a.symbol());
+		
+		ImmutableSetMultimap.Builder<E, State<E>> stateBuilder = ImmutableSetMultimap.builder();
+		automaton.states().stream().forEach(s -> {
+			s.elements().forEach(e -> stateBuilder.put(e, s));
+		});
+		this.stateIndex = stateBuilder.build();
 		this.state = automaton.initialState();
-		symbolIndex = Maps.uniqueIndex(automaton.alphabet(), a -> a.symbol());
+		this.symbols = EmptySymbolChain.getInstance();
 	}
 
 	@Override
-	public boolean accept(A input) {
-		symbols = ArraySymbolChain.newChain(symbols, input);
+	public boolean input(A input) {
+		SymbolChain<A> symbols = ArraySymbolChain.newChain(this.symbols, input);
 		Symbol<A> symbol = symbolIndex.get(input);
 		Preconditions.checkNotNull(symbol);
 
 		Optional<Transition<E, A>> opt = automaton.transition(state, symbol);
 		if (opt.isPresent()) {
 			Transition<E, A> transition = opt.get();
-			helper.changeState(this, transition, symbols);
-			state = transition.target();
-			return true; 
+			helper.preChange(this, transition, symbols);
+			
+			A changedInput = helper.change(this, transition, symbols);
+			if (changedInput != null) {
+				//till now, there is no change in machine internal state so the following line is ok.
+				return input(changedInput);
+			} else {
+				this.symbols = symbols;
+				this.state = transition.target();
+				if (automaton.outputStates().contains(state)) {
+					helper.acceptInput(this, symbols, state);
+				}
+				return helper.postChange(this, transition, symbols);
+			}
 		} else {
-			resetState();
+			resetInput(); 
 			return false;
 		} 
 	}
+	
+	@Override
+	public SymbolChain<A> acceptInput() {
+		if (!automaton.outputStates().contains(state)) {
+			throw new IllegalStateException("Cannot accept a non-output state " + state);
+		}
+		SymbolChain<A> symbols = this.symbols;
+		this.symbols = EmptySymbolChain.getInstance();
+		return symbols;
+	}
 
 	@Override
-	public void resetState() {
-		helper.resetState(this, symbols, state);
+	public SymbolChain<A> resetInput() {
+		if (!automaton.outputStates().contains(state)) {
+			helper.rejectInput(this, symbols, state);
+		}
 		
 		state = automaton.initialState();
-		symbols = EmptySymbolChain.getInstance();
+		SymbolChain<A> symbols = this.symbols;
+		this.symbols = EmptySymbolChain.getInstance();
+		return symbols;
 	}
 	
 	@Override
@@ -72,53 +107,56 @@ public class StateMachineImpl<E extends Comparable<? super E>, A extends Compara
 	}
 	
 	@Override
-	public void addStateChangeListener(StateChangeListener listener) {
+	public void addStateChangeListener(StateChangeListener<E,A> listener) {
 		helper.addStateChangeListener(listener);
 	}
 
 	@Override
-	public void addStateChangeListener(State state, StateChangeListener listener) {
-		helper.addStateChangeListener(state, listener);
+	public void addStateChangeListener(E state, StateChangeListener<E, A> listener) {
+		for (State<E> state2 : stateIndex.get(state)) {
+			helper.addStateChangeListener(state2, listener);
+		}
 	}
 
 	@Override
-	public void removeStateChangeListener(StateChangeListener listener) {
+	public void removeStateChangeListener(StateChangeListener<E, A> listener) {
 		helper.removeStateChangeListener(listener);
 	}
 
 	@Override
-	public void removeStateChangeListener(State state,
-			StateChangeListener listener) {
-		helper.removeStateChangeListener(state, listener);
+	public void removeStateChangeListener(E state, StateChangeListener<E, A> listener) {
+		for (State<E> state2 : stateIndex.get(state)) {
+			helper.removeStateChangeListener(state2, listener);
+		}
 	}
 
 	@Override
-	public void addTransitionListener(TransitionListener listener) {
+	public void addTransitionListener(TransitionListener<E, A> listener) {
 		helper.addTransitionListener(listener);
 	}
 
 	@Override
-	public void addTransitionListener(Symbol input, TransitionListener listener) {
-		helper.addTransitionListener(input, listener);
+	public void addTransitionListener(A input, TransitionListener<E, A> listener) {
+		helper.addTransitionListener(symbolIndex.get(input), listener);
 	}
 
 	@Override
-	public void removeTransitionListener(TransitionListener listener) {
+	public void removeTransitionListener(TransitionListener<E, A> listener) {
 		helper.removeTransitionListener(listener);
 	}
 
 	@Override
-	public void removeTransitionListener(Symbol input, TransitionListener listener) {
-		helper.removeTransitionListener(input, listener);
+	public void removeTransitionListener(A input, TransitionListener<E, A> listener) {
+		helper.removeTransitionListener(symbolIndex.get(input), listener);
 	}
 
 	@Override
-	public void addStateMachineListener(StateMachineListener listener) {
+	public void addStateMachineListener(StateMachineListener<E, A> listener) {
 		helper.addStateMachineListener(listener);
 	}
 
 	@Override
-	public void removeStateMachineListener(StateMachineListener listener) {
+	public void removeStateMachineListener(StateMachineListener<E, A> listener) {
 		helper.removeStateMachineListener(listener);
 	}
 }

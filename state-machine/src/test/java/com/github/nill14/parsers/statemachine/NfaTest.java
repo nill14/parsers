@@ -161,7 +161,7 @@ public class NfaTest {
 	private static void testAccept(StateMachine<String, Integer> machine, Integer... input) {
 
 		for (Integer symbol : input) {
-			boolean accept = machine.accept(symbol);
+			boolean accept = machine.input(symbol);
 			assertTrue(accept);
 		}
 	}
