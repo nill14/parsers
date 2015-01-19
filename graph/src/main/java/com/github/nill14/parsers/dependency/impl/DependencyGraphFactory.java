@@ -146,6 +146,10 @@ public class DependencyGraphFactory<K, M>  {
 					throw new UnsatisfiedDependencyException(target, key);
 				}
 				for (M source : from) {
+					if (source.equals(target)) {
+						continue; //avoid self dependencies
+					}
+					
 					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
 					log.trace("({}) {} -> {}", key, source, target);
 					edges.add(edge);
@@ -156,6 +160,10 @@ public class DependencyGraphFactory<K, M>  {
 			
 			for (M target : toOpt) {
 				for (M source : from) {
+					if (source.equals(target)) {
+						continue; //avoid self dependencies
+					}
+					
 					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
 					log.trace("({} opt) {} -> {}", key, source, target);
 					edges.add(edge);
