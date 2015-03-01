@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.nill14.parsers</groupId>
-	<artifactId>graph</artifactId>
+	<artifactId>dependency-graph</artifactId>
 	<version>2.1.2-SNAPSHOT</version>
 
 	<parent>
@@ -11,7 +11,7 @@
 		<version>9</version>
 	</parent>
 
-	<name>Graph </name>
+	<name>Dependency Graph Library</name>
 	<description>
 		Implementation of directed acyclic graph along with some graph algorithms and dependency management.
 	</description>
@@ -44,13 +44,17 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.2,</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.1</version>
+			</plugin>
 		</plugins>
 	</build>
 
