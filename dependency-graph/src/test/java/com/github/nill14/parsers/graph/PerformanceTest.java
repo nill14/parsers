@@ -37,8 +37,8 @@ public class PerformanceTest {
 	private static DirectedGraph<Module, GraphEdge<Module>> graph;
 	private static ImmutableList<Module> topologicalOrder;
 	private static Map<Module, Integer> moduleRankings;
-	private static final int parallelism = Runtime.getRuntime().availableProcessors();
-//	private static final int parallelism = 20;
+//	private static final int parallelism = Runtime.getRuntime().availableProcessors();
+	private static final int parallelism = 20;
 	private static final ExecutorService executor = Executors.newFixedThreadPool(parallelism);
 
 	private static Set<Module> buildChain(String prefix, int count, int padding) {

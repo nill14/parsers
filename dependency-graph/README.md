@@ -20,27 +20,27 @@ Minimal example
 ---------------
 <pre><code>
 abstract class AbstractModule {
-	IDependencyDescriptor<Class<?>> getDependencyDescriptor() {
-		IDependencyDescriptorBuilder<Class<?>> builder = 
+	IDependencyDescriptor&lt;Class&lt;?&gt;&gt; getDependencyDescriptor() {
+		IDependencyDescriptorBuilder&lt;Class&lt;?&gt;&gt; builder = 
 				DependencyDescriptor.builder(this.getClass());
 		buildDependencies(builder);
 		return builder.build();
 	}
 
-	void buildDependencies(IDependencyDescriptorBuilder<Class<?>> builder) {}
+	void buildDependencies(IDependencyDescriptorBuilder&lt;Class&lt;?&gt;&gt; builder) {}
 }
 
 class ModuleA extends AbstractModule {}
 
 class ModuleB extends AbstractModule {
-	void buildDependencies(IDependencyDescriptorBuilder<Class<?>> builder) {
+	void buildDependencies(IDependencyDescriptorBuilder&lt;Class&lt;?&gt;&gt; builder) {
 		builder.uses(ModuleA.class);
 		builder.usesOptionally(Calendar.class);
 	}
 }
 
 class ModuleC extends AbstractModule {
-	void buildDependencies(IDependencyDescriptorBuilder<Class<?>> builder) {
+	void buildDependencies(IDependencyDescriptorBuilder&lt;Class&lt;?&gt;&gt; builder) {
 		builder.provides(Calendar.class);
 	}
 }
@@ -50,18 +50,20 @@ public static void main(String[] args) throws UnsatisfiedDependencyException,
 	CyclicGraphException, ExecutionException {
 	
 // create dependency graph
-Set<AbstractModule> modules = Sets.newHashSet(new ModuleA(), new ModuleB(), new ModuleC());
+Set&lt;AbstractModule&gt; modules = Sets.newHashSet(new ModuleA(), new ModuleB(), new ModuleC());
 
-IDependencyGraph<AbstractModule> dependencyGraph = 
-	DependencyGraphFactory.newInstance(modules, m -> m.getDependencyDescriptor());
+IDependencyGraph&lt;AbstractModule&gt; dependencyGraph = 
+	DependencyGraphFactory.newInstance(modules, m -&gt; m.getDependencyDescriptor());
 
 ExecutorService executor = Executors.newCachedThreadPool();
 // execute first ModuleA and ModuleC in parallel and when completed, executes ModuleB
-dependencyGraph.walkGraph(executor, module -> System.out.println(module));
+dependencyGraph.walkGraph(executor, module -&gt; System.out.println(module));
 
 // prints out the dependency tree to System.out
-new DependencyTreePrinter<>(dependencyGraph).toConsole();
+new DependencyTreePrinter&lt;&gt;(dependencyGraph).toConsole();
 
+// prints out the module rankings to System.out
+new ModuleRankingsPrinter&lt;&gt;(dependencyGraph).toConsole();
 }
 }
 </code></pre>
@@ -77,7 +79,7 @@ the exception is added to the originating `java.util.concurrent.ExecutionExcepti
 
 <pre><code>
 try {
-	dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
+	dependencyGraph.walkGraph(executor, new IConsumer&lt;Module&gt;() {
 		@Override
 		public void process(Module module) throws Exception {
 			//exception from worker thread	
@@ -111,11 +113,11 @@ The test creates little over 10000 modules and executes them using given paralle
 The raw execution (ignoring dependency order) is compared to one of the actual 
 `com.github.nill14.parsers.graph.GraphWalker` implementations. By raw execution code, we mean Thread.sleep(1) code.
 
- * For 4 threads, the GraphWalker time is equal to raw execution (!)
- * For 20 threads, the GraphWalker time was about a double of the raw execution.
+ * For 4 threads, the GraphWalker time is equal to raw execution.
+ * For 20 threads (on 4 core machine), the execution overhead is about 1s (per 10100 execution units).
  
 There are actually 4 implementations of `com.github.nill14.parsers.graph.GraphWalker` interface, 
 each providing slightly different characteristics for different graph structures and parallelism levels.
-Should be performance a critical factor for your application, you may want to experiment with different GraphWalker implementations.   
+Should performance be a critical factor for your application, you may want to experiment with different GraphWalker implementations.   
 
  
