@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -56,11 +57,24 @@ public interface IDependencyGraph<M> {
 	
 	/**
 	 * 
+	 * Note: The parallelism is determined automatically from {@link ThreadPoolExecutor} and processor cores.
+	 * If this is not an option, use {@link #walkGraph(ExecutorService, IConsumer, int)}
+	 * 
 	 * @param executor an executor to be used for executing the closure
 	 * @param moduleConsumer a processing closure
 	 * @throws ExecutionException when the closure throws an exception
 	 */
 	void walkGraph(ExecutorService executor, IConsumer<M> moduleConsumer) throws ExecutionException;
+
+	/**
+	 * 
+	 * @param executor an executor to be used for executing the closure
+	 * @param moduleConsumer a processing closure
+	 * @param parallelism the maximum amount of concurrently scheduled tasks 
+	 * @throws ExecutionException when the closure throws an exception
+	 */
+	void walkGraph(ExecutorService executor, IConsumer<M> moduleConsumer, int parallelism)
+			throws ExecutionException;
 
 	/**
 	 * Synchronous version of {@link #walkGraph(ExecutorService, IConsumer)}
@@ -70,4 +84,5 @@ public interface IDependencyGraph<M> {
 	 * @throws ExecutionException when the closure throws an exception
 	 */
 	void iterateTopoOrder(IConsumer<M> moduleConsumer) throws ExecutionException;
+
 }

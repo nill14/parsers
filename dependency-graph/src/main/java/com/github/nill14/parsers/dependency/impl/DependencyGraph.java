@@ -122,7 +122,7 @@ class DependencyGraph<M> implements IDependencyGraph<M> {
 		}
 	}
 
-	
+	@Override
 	public void walkGraph(final ExecutorService executor,
 			final IConsumer<M> moduleConsumer, int parallelism)
 			throws ExecutionException {
