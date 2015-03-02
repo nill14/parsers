@@ -7,6 +7,10 @@ Using a graph algorithm is the most effective solution for the parallelization.
 Actual time savings depend of graph structure and could vary
 but according on our experience the actual savings in real scenarios usually exceed 50% for the parallelized parts.
 
+JavaDoc
+-------
+
+[nill14.github.io/parsers/dependency-graph/apidocs/](https://nill14.github.io/parsers/dependency-graph/apidocs/)
 
 Dependencies
 ------------

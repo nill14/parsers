@@ -9,7 +9,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.graph.DirectedGraph;
 import com.github.nill14.parsers.graph.GraphEdge;
@@ -47,12 +46,12 @@ public class DependencyTreePrinter<M> {
 		}).toList();
 	}
 	
-	private void visitRootNode(IConsumer<String> lineConsumer, M vertex, Set<M> visited) {
+	private void visitRootNode(StringConsumer lineConsumer, M vertex, Set<M> visited) {
 		printLine(lineConsumer, vertex, "", "");
 		visitNode(lineConsumer, "", vertex, visited);
 	}
 	
-	private void visitNode(IConsumer<String> lineConsumer, String prefix, M vertex, Set<M> visited) {
+	private void visitNode(StringConsumer lineConsumer, String prefix, M vertex, Set<M> visited) {
 		Set<M> predecessors = dependencyGraph.getDirectDependencies(vertex);
 		if (filterTransitive && !predecessors.isEmpty() && visited.contains(vertex)) {
 			int count = dependencyGraph.getAllDependencies(vertex).size();
@@ -78,7 +77,7 @@ public class DependencyTreePrinter<M> {
 		}
 	}
 	
-	private void printLine(IConsumer<String> lineConsumer, M vertex, String prefix, String next) {
+	private void printLine(StringConsumer lineConsumer, M vertex, String prefix, String next) {
 		StringBuilder b = new StringBuilder();
 		b.append(prefix);
 		b.append(next);
@@ -92,7 +91,7 @@ public class DependencyTreePrinter<M> {
 		}
 	}
 
-	private void printSkippedLine(IConsumer<String> lineConsumer, String prefix, int count) {
+	private void printSkippedLine(StringConsumer lineConsumer, String prefix, int count) {
 		StringBuilder b = new StringBuilder();
 		b.append(prefix);
 		b.append(" \\- ");
@@ -105,7 +104,7 @@ public class DependencyTreePrinter<M> {
 		}
 	}
 	
-	public void processLines(IConsumer<String> lineConsumer) {
+	private void processLines(StringConsumer lineConsumer) {
 		Set<M> visited = Sets.newHashSet();
 		Collection<M> rootNodes = findRootNodes();
 		for (M rootNode : rootNodes) {
@@ -125,12 +124,7 @@ public class DependencyTreePrinter<M> {
 	 */
 	public void toPrintStream(final PrintStream p) {
 		p.println("Dependency tree");
-		processLines(new IConsumer<String>() {
-			@Override
-			public void process(String line) {
-				p.println(line);
-			}
-		});
+		processLines(new PrintStreamConsumer(p));
 	}
 	
 	/**
@@ -139,12 +133,7 @@ public class DependencyTreePrinter<M> {
 	public void toInfoLog(final Logger log) {
 		if (log.isInfoEnabled()) {
 			log.info("Dependency tree");
-			processLines(new IConsumer<String>() {
-				@Override
-				public void process(String line) {
-					log.info(line);
-				}
-			});
+			processLines(new InfoLogConsumer(log));
 		}
 	}
 	
@@ -154,12 +143,7 @@ public class DependencyTreePrinter<M> {
 	public void toDebugLog(final Logger log) {
 		if (log.isDebugEnabled()) {
 			log.debug("Dependency tree");
-			processLines(new IConsumer<String>() {
-				@Override
-				public void process(String line) {
-					log.debug(line);
-				}
-			});
+			processLines(new DebugLogConsumer(log));
 		}
 	}
 

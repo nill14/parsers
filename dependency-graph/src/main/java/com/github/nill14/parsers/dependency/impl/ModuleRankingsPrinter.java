@@ -1,14 +1,12 @@
 package com.github.nill14.parsers.dependency.impl;
 
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
-import com.google.common.collect.Lists;
 
 public class ModuleRankingsPrinter<M> {
 	
@@ -32,15 +30,12 @@ public class ModuleRankingsPrinter<M> {
 		}
 	}
 	
-	public Collection<String> getLines() {
-		Collection<String> result = Lists.newArrayList();
+	private void processLines(StringConsumer lineConsumer) {
 		for (M node : topologicalOrder) {
 			boolean executionBit = dependencyGraph.getDirectDependencies(node).isEmpty();
 			int ranking = moduleRankings.get(node);
-			String line = printLine(node, executionBit, ranking);
-			result.add(line);
+			lineConsumer.process(printLine(node, executionBit, ranking));
 		}
-		return result;
 	}
 	
 	/**
@@ -55,9 +50,7 @@ public class ModuleRankingsPrinter<M> {
 	 */
 	public void toPrintStream(PrintStream p) {
 		p.println("Module Rankings");
-		for (String line : getLines()) {
-			p.println(line);
-		}
+		processLines(new PrintStreamConsumer(p));
 	}
 	
 	/**
@@ -66,9 +59,7 @@ public class ModuleRankingsPrinter<M> {
 	public void toInfoLog(Logger log) {
 		if (log.isInfoEnabled()) {
 			log.info("Module Rankings");
-			for (String line : getLines()) {
-				log.info(line);
-			}
+			processLines(new InfoLogConsumer(log));
 		}
 	}
 	
@@ -78,9 +69,7 @@ public class ModuleRankingsPrinter<M> {
 	public void toDebugLog(Logger log) {
 		if (log.isDebugEnabled()) {
 			log.debug("Module Rankings");
-			for (String line : getLines()) {
-				log.debug(line);
-			}
+			processLines(new DebugLogConsumer(log));
 		}
 	}
 

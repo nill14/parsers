@@ -38,6 +38,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!-- 		mvn clean javadoc:javadoc scm-publish:publish-scm -->
+<!-- 		<scmpublish.dryRun>true</scmpublish.dryRun> -->
+<!-- 		<scmpublish.skipCheckin>true</scmpublish.skipCheckin> -->
 	</properties>
 
 	<build>
@@ -54,7 +57,33 @@
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.10.1</version>
+				<configuration>
+<!-- 					<aggregate>true</aggregate> -->
+					<reportOutputDirectory>${project.reporting.outputDirectory}/${project.artifactId}/apidocs</reportOutputDirectory>
+					<show>public</show>
+					<nohelp>true</nohelp>
+					<header>${project.name}, ${project.version}</header>
+					<footer>${project.name}, ${project.version}</footer>
+					<doctitle>${project.name}, ${project.version}</doctitle>
+					<links>
+						<link>http://docs.guava-libraries.googlecode.com/git/javadoc</link>
+						<link>http://www.slf4j.org/apidocs/</link>
+					</links>
+				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-scm-publish-plugin</artifactId>
+				<version>1.1</version>
+				<configuration>
+<!-- 					<checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory> -->
+					<checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+					<content>${project.reporting.outputDirectory}</content>
+<!-- 					<content>${project.reporting.outputDirectory}/apidocs</content> -->
+					<skipDeletedFiles>true</skipDeletedFiles>
+					<pubScmUrl>scm:git:git@github.com:nill14/parsers.git</pubScmUrl>
+					<scmBranch>gh-pages</scmBranch> <!-- branch with static site -->
+				</configuration>
+			</plugin>			
 		</plugins>
 	</build>
 
