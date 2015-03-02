@@ -1,0 +1,5 @@
+com.github.nill14.parsers.dependency
+com.github.nill14.parsers.dependency.impl
+com.github.nill14.parsers.graph
+com.github.nill14.parsers.graph.impl
+com.github.nill14.parsers.graph.utils
