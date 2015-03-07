@@ -147,19 +147,4 @@ public class DependencyTreePrinter<M> {
 		}
 	}
 
-	/**
-	 * @deprecated use {@link #toInfoLog(Logger)} instead
-	 */
-	@Deprecated
-	public void toInfoLog() {
-		toInfoLog(LoggerFactory.getLogger(DependencyTreePrinter.class));
-	}
-	
-	/**
-	 * @deprecated use {@link #toDebugLog(Logger)} instead
-	 */
-	@Deprecated
-	public void toDebugLog() {
-		toDebugLog(LoggerFactory.getLogger(DependencyTreePrinter.class));
-	}
 }

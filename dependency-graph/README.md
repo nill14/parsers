@@ -106,8 +106,8 @@ Maven dependency
 &lt;dependencies&gt;
 	&lt;dependency&gt;
 		&lt;groupId&gt;com.github.nill14.parsers&lt;/groupId&gt;
-		&lt;artifactId&gt;graph&lt;/artifactId&gt;
-		&lt;version&gt;2.1.1&lt;/version&gt;
+		&lt;artifactId&gt;dependency-graph&lt;/artifactId&gt;
+		&lt;version&gt;2.2.0&lt;/version&gt;
 	&lt;/dependency&gt;
 &lt;/dependencies&gt;
 </code></pre>
