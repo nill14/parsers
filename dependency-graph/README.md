@@ -62,18 +62,57 @@ Set&lt;AbstractModule&gt; modules = Sets.newHashSet(new ModuleA(), new ModuleB()
 IDependencyGraph&lt;AbstractModule&gt; dependencyGraph = 
 	DependencyGraphFactory.newInstance(modules, m -&gt; m.getDependencyDescriptor());
 
+
+// prints out the dependency tree and module rankings to System.out
+new DependencyTreePrinter&lt;&gt;(dependencyGraph).toConsole();
+new ModuleRankingsPrinter&lt;&gt;(dependencyGraph).toConsole();
+
 ExecutorService executor = Executors.newCachedThreadPool();
 // execute first ModuleA and ModuleC in parallel and when completed, executes ModuleB
 dependencyGraph.walkGraph(executor, module -&gt; System.out.println(module));
-
-// prints out the dependency tree to System.out
-new DependencyTreePrinter&lt;&gt;(dependencyGraph).toConsole();
-
-// prints out the module rankings to System.out
-new ModuleRankingsPrinter&lt;&gt;(dependencyGraph).toConsole();
 }
 }
 </code></pre>
+
+Extra snippets
+--------------
+
+Change the thread name according to module name: (may be useful for logging)
+<pre><code>
+dependencyGraph.walkGraph(executor, module -> {
+	String name = Thread.currentThread().getName();
+	try {
+		Thread.currentThread().setName(module.getName());
+		module.startModule();
+	} finally {
+		Thread.currentThread().setName(name);
+	}
+});
+</code></pre>
+
+
+Dependency printer - example output
+-----------------------------------
+
+It the following sample output, DeliveryModule depends on SnackModule. SnackModule will be executed before.
+The module rankings show how many modules in depth are waiting for execution.
+BreadModule and CustomerModule have execution flag and can be executed immediately.
+
+<pre><code>
+Dependency tree
+com.github.nill14.utils.moduledi.module.DeliveryModule@67117f44 (0)
+ \- com.github.nill14.utils.moduledi.module.SnackModule@6f79caec (1)
+    \- com.github.nill14.utils.moduledi.module.BreadModule@12bc6874 (2)
+com.github.nill14.utils.moduledi.module.ActivationModule@2471cca7 (0)
+ \- com.github.nill14.utils.moduledi.module.CustomerModule@5d3411d (1)
+Module Rankings
+* com.github.nill14.utils.moduledi.module.BreadModule@12bc6874 (2)
+  com.github.nill14.utils.moduledi.module.SnackModule@6f79caec (1)
+* com.github.nill14.utils.moduledi.module.CustomerModule@5d3411d (1)
+  com.github.nill14.utils.moduledi.module.DeliveryModule@67117f44 (0)
+  com.github.nill14.utils.moduledi.module.ActivationModule@2471cca7 (0)
+</code></pre>
+
 
 Exception propagation
 ---------------------
