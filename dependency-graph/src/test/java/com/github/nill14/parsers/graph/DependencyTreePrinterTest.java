@@ -1,13 +1,13 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.util.Set;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
@@ -97,8 +97,8 @@ public class DependencyTreePrinterTest {
 		Module nodeA = findModule(a);
 		Module nodeB = findModule(b);
 		
-		assertTrue(nodeA + "->" + nodeB, graph.successors(nodeA).contains(nodeB));
-		assertTrue(nodeA + "->" + nodeB, graph.predecessors(nodeB).contains(nodeA));
+		assertTrue(graph.successors(nodeA).contains(nodeB), nodeA + "->" + nodeB);
+		assertTrue(graph.predecessors(nodeB).contains(nodeA), nodeA + "->" + nodeB);
 	}
 	
 	@Test

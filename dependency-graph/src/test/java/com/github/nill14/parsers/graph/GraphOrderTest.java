@@ -1,6 +1,6 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -8,10 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.github.nill14.parsers.dependency.IDependencyGraph;
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
@@ -34,7 +34,7 @@ public class GraphOrderTest {
 	private ImmutableMap<String, Module> moduleIndex;
 
 
-	@Before
+	@BeforeMethod
 	public void init() throws UnsatisfiedDependencyException, CyclicGraphException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
@@ -101,8 +101,8 @@ public class GraphOrderTest {
 		Module nodeA = findModule(a);
 		Module nodeB = findModule(b);
 		
-		assertTrue(nodeA + "->" + nodeB, graph.successors(nodeA).contains(nodeB));
-		assertTrue(nodeA + "->" + nodeB, graph.predecessors(nodeB).contains(nodeA));
+		assertTrue(graph.successors(nodeA).contains(nodeB), nodeA + "->" + nodeB);
+		assertTrue(graph.predecessors(nodeB).contains(nodeA), nodeA + "->" + nodeB);
 	}
 	
 	@Test
@@ -144,7 +144,7 @@ public class GraphOrderTest {
 			for (int j = i; j < topologicalOrdering.size(); j++) {
 				Module m = topologicalOrdering.get(j);
 				
-				assertFalse(n + "<-" + m, graph.predecessors(n).contains(m));
+				assertFalse(graph.predecessors(n).contains(m), n + "<-" + m);
 			}
 		}
 	}

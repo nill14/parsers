@@ -1,13 +1,12 @@
 package com.github.nill14.parsers.graph;
-
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
@@ -27,7 +26,7 @@ public class GraphCycleSelfUseTest {
 
 
 
-	@Before
+	@BeforeMethod
 	public void init() throws UnsatisfiedDependencyException, CyclicGraphException {
 		modules = ImmutableSet.of(
 				Module.builder("A")
@@ -56,8 +55,8 @@ public class GraphCycleSelfUseTest {
 		Module nodeA = findModule(a);
 		Module nodeB = findModule(b);
 		
-		assertTrue(nodeA + "->" + nodeB, graph.successors(nodeA).contains(nodeB));
-		assertTrue(nodeA + "->" + nodeB, graph.predecessors(nodeB).contains(nodeA));
+		assertTrue(graph.successors(nodeA).contains(nodeB), nodeA + "->" + nodeB);
+		assertTrue(graph.predecessors(nodeB).contains(nodeA), nodeA + "->" + nodeB);
 	}
 	
 	

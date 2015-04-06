@@ -1,7 +1,5 @@
 package com.github.nill14.parsers.graph;
-
-import static org.junit.Assert.*;
-
+import static org.testng.Assert.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
@@ -12,12 +10,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
@@ -43,10 +39,9 @@ public class GraphWalkerTest {
 	private ImmutableMap<String, Module> moduleIndex;
 
 
-	@Rule public ExpectedException thrown = ExpectedException.none();
 	private ImmutableList<Module> topoList;
 
-	@Before
+	@BeforeMethod
 	public void init() throws CyclicGraphException, UnsatisfiedDependencyException {
 		modules = ImmutableSet.of(
 			Module.builder("A")
@@ -115,8 +110,8 @@ public class GraphWalkerTest {
 		Module nodeA = findModule(a);
 		Module nodeB = findModule(b);
 		
-		assertTrue(nodeA + "->" + nodeB, graph.successors(nodeA).contains(nodeB));
-		assertTrue(nodeA + "->" + nodeB, graph.predecessors(nodeB).contains(nodeA));
+		assertTrue(graph.successors(nodeA).contains(nodeB), nodeA + "->" + nodeB);
+		assertTrue(graph.predecessors(nodeB).contains(nodeA), nodeA + "->" + nodeB);
 	}
 
 	private void assertTopoOrder(List<Module> topologicalOrdering) {
@@ -127,12 +122,12 @@ public class GraphWalkerTest {
 			for (int j = i; j < topologicalOrdering.size(); j++) {
 				Module m = topologicalOrdering.get(j);
 				
-				assertFalse(n + "<-" + m, graph.predecessors(n).contains(m));
+				assertFalse(graph.predecessors(n).contains(m), n + "<-" + m);
 			}
 		}
 	}
 	
-	@Test(timeout=1000)
+	@Test(timeOut=1000)
 	public void testWalk() throws InterruptedException, ExecutionException {
 		log.info("testWalk start");
 		final AtomicInteger count = new AtomicInteger();
@@ -179,12 +174,9 @@ public class GraphWalkerTest {
 	}	
 	
 	
-	@Test(timeout=1000)
+	@Test(timeOut=1000, expectedExceptions=IOException.class, expectedExceptionsMessageRegExp="test checked exception")
 	public void testException() throws InterruptedException, IOException {
 		final AtomicInteger count = new AtomicInteger();
-		
-		thrown.expect(IOException.class);
-		thrown.expectMessage("test checked exception");
 		
 		try {
 			dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
@@ -217,12 +209,9 @@ public class GraphWalkerTest {
 		new DependencyTreePrinter<>(dependencyGraph, true).toInfoLog(log);
 	}
 
-	@Test(timeout=1000)
+	@Test(timeOut=1000, expectedExceptions=IOException.class, expectedExceptionsMessageRegExp="test checked exception")
 	public void testExhaustException() throws InterruptedException, IOException {
 		final AtomicInteger count = new AtomicInteger();
-		
-		thrown.expect(IOException.class);
-		thrown.expectMessage("test checked exception");
 		
 		try {
 			dependencyGraph.walkGraph(executor, new IConsumer<Module>() {
@@ -251,7 +240,7 @@ public class GraphWalkerTest {
 		assertEquals(modules.size(), count.get());
 	}
 	
-	@Test(timeout=2000)
+	@Test(timeOut=2000)
 	public void testExhaustAndContinue() throws InterruptedException, ExecutionException {
 		final AtomicInteger count = new AtomicInteger();
 		
@@ -272,7 +261,7 @@ public class GraphWalkerTest {
 		assertEquals(modules.size(), count.get());
 	}
 	
-	@Test(timeout=1000)
+	@Test(timeOut=1000)
 	public void testExhaustWalker() throws InterruptedException, IOException, ExecutionException {
 		//there are five releaseable modules at the beginning
 		final GraphWalker3<Module> walker = new GraphWalker3<>(graph, topoList, 1000);
@@ -294,7 +283,7 @@ public class GraphWalkerTest {
 	}
 	
 
-	@Test(timeout=2000)
+	@Test(timeOut=2000)
 	public void testExhaustAndContinue2() throws InterruptedException, ExecutionException {
 		final AtomicInteger count = new AtomicInteger();
 		

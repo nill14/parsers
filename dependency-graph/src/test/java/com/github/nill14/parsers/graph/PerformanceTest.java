@@ -1,7 +1,5 @@
 package com.github.nill14.parsers.graph;
 
-import static org.junit.Assert.*;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -9,10 +7,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.testng.Assert.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.github.nill14.parsers.dependency.IConsumer;
 import com.github.nill14.parsers.dependency.IDependencyGraph;
