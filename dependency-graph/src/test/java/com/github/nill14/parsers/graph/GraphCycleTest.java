@@ -2,6 +2,7 @@ package com.github.nill14.parsers.graph;
 import static org.testng.Assert.*;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import com.github.nill14.parsers.dependency.UnsatisfiedDependencyException;
 import com.github.nill14.parsers.dependency.impl.DependencyGraphFactory;
 import com.github.nill14.parsers.graph.utils.GraphCycleDetector;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -123,4 +125,18 @@ public class GraphCycleTest {
 		assertEquals(3, cycles.size());
 	}
 
+	@Test
+	public void testCyclicException() {
+		try {
+			DependencyGraphFactory.fromGraph(graph, Collections.<Module, Integer>emptyMap());
+		} catch (UnsatisfiedDependencyException e) {
+			e.printStackTrace();
+		} catch (CyclicGraphException e) {
+			log.info("{}", e.getDebugCycles());
+		}
+		Collection<Deque<Module>> cycles = new GraphCycleDetector<>(graph).getNontrivialCycles();
+		
+		
+		assertEquals(3, cycles.size());
+	}
 }

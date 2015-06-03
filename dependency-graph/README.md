@@ -29,7 +29,7 @@ The following code demonstrates minimal yet fully functional example. Just copy 
 abstract class AbstractModule {
 	IDependencyDescriptor&lt;Class&lt;?&gt;&gt; getDependencyDescriptor() {
 		IDependencyDescriptorBuilder&lt;Class&lt;?&gt;&gt; builder = 
-				DependencyDescriptor.builder(this.getClass());
+				DependencyDescriptor.&lt;Class&lt;?&gt;&gt;builder(this.getClass());
 		buildDependencies(builder);
 		return builder.build();
 	}

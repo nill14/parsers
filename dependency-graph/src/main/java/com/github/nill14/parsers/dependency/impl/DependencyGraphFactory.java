@@ -150,7 +150,7 @@ public class DependencyGraphFactory<K, M>  {
 						continue; //avoid self dependencies
 					}
 					
-					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
+					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target, key);
 					log.trace("({}) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
@@ -164,7 +164,7 @@ public class DependencyGraphFactory<K, M>  {
 						continue; //avoid self dependencies
 					}
 					
-					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target);
+					GraphEdge<M> edge = EvaluatedGraphEdge.edge(source, target, key);
 					log.trace("({} opt) {} -> {}", key, source, target);
 					edges.add(edge);
 				}
