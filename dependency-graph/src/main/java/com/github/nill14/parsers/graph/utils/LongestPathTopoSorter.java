@@ -72,7 +72,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 
 	/**
 	 * The result is topologically sorted
-	 * @param priorityFunction an optional function for increasing priority in range 0..100000
+	 * @param priorityFunction an optional function for increasing priority returning positive number (or zero as default value)
 	 * @return A set of (Vertex, count) pairs
 	 * @throws CyclicGraphException when the graph contains cycles
 	 */
@@ -98,7 +98,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	}
 	
 	private void visitCount(Vertex<V> n, Function<V, Integer> nodePriority) {
-		int nodeValue = evalPriority(n, nodePriority);
+		int nodeValue = evalDuration(n, nodePriority);
 		Collection<E> next = getNextEdges(n);
 		if (next.isEmpty()) {
 			n.depth = nodeValue;
@@ -106,10 +106,14 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 			int max = 0;
 			for (E edge : next) {
 				Vertex<V> m = getVertex(edge.target());
-				int count = evalEdge(edge) + m.depth;
+				//Vertex m was already evaluated
+				int count = evalTransition(edge) + m.depth;
 				max = max(max, count);
 			}
 			n.depth = max + nodeValue;
+			if (n.depth < max) {
+				throw new IllegalStateException("Range overflow: " + n.depth);
+			}
 		}
 	}
 	
@@ -118,7 +122,7 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	 * @param edge
 	 * @return default is 1
 	 */
-	private int evalEdge(E edge) {
+	private int evalTransition(E edge) {
 		int val = edgeEval.apply(edge);
 		if (val < 1 || val > 100000) {
 			throw new IllegalArgumentException(String.format("Edge cost must be in range 1..100000: %s", edge, val));
@@ -127,13 +131,13 @@ public class LongestPathTopoSorter<V, E extends GraphEdge<V>> {
 	}
 	
 	/**
-	 * @param edge
+	 * @param n The vertex
 	 * @return default is 0
 	 */
-	private int evalPriority(Vertex<V> n, Function<V, Integer> nodePriority) {
+	private int evalDuration(Vertex<V> n, Function<V, Integer> nodePriority) {
 		int val = nodePriority.apply(n.node);
-		if (val < 0 || val > 100000) {
-			throw new IllegalArgumentException(String.format("Node %s priority must be in range 0..100000: %s", n.node, val));
+		if (val < 0) {
+			throw new IllegalArgumentException(String.format("Node %s priority must be bigger or equal to zero: %s", n.node, val));
 		}
 		return val;
 	}
